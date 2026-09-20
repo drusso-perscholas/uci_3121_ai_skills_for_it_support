@@ -512,11 +512,11 @@
     <nav class="page-nav" aria-label="On this page">
       <p>Lesson Contents</p>
       <ol>
-        <li><a href="#lesson-0">Introduction</a><span class="toc-status" data-tracks="lesson-0"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
-        <li><a href="#unit-scenario">Scenario</a><span class="toc-status" data-tracks="unit-scenario"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><a href="#lesson-0">Introduction</li>
         <li><a href="#lesson-1-1">Lesson 1.1</a><span class="toc-status" data-tracks="lesson-1-1"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
         <li><a href="#lesson-1-2">Lesson 1.2</a><span class="toc-status" data-tracks="lesson-1-2"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
         <li><a href="#lesson-1-3">Lesson 1.3</a><span class="toc-status" data-tracks="lesson-1-3"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><a href="#lesson-1-4">Lesson 1.4</a><span class="toc-status" data-tracks="lesson-1-4"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
       </ol>
     </nav>
   </div>
@@ -531,22 +531,12 @@
       <br>
     <div class="video-embed">
       <div class="video-frame">
-        <iframe src="VIDEO_URL_HERE" title="Placeholder: describe this video's content for screen-reader users" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+        <iframe src="https://drusso-perscholas.github.io/uci_3121_ai_skills_for_it_support/demos/Vidtest.mp4" title="Placeholder: describe this video's content for screen-reader users" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
       </div>
       <p class="video-transcript"><a href="TRANSCRIPT_URL_HERE">View transcript</a></p>
     </div>
 
-    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
-         id ("lesson-0"), which keeps its cookie separate from every
-         other section's button. See the script at the bottom of the
-         page for how this works. -->
-    <div class="track-progress">
-      <button type="button" class="btn-track" data-section-id="lesson-0" aria-pressed="false">
-        <span class="track-icon" aria-hidden="true">&#10007;</span>
-        <span class="track-label">Work Complete</span>
-      </button>
-    </div>
-  </section>
+      </section>
   <!-- ================= END LESSON SECTION ================= -->
 
   <!-- ================= UNIT-LEVEL SCENARIO / INSTRUCTIONAL TEXT ================= -->
@@ -573,15 +563,7 @@
       
     </section>
 
-    <!-- WORK-COMPLETE BUTTON — data-section-id is "unit-scenario",
-         matching this block's own id. Change it if you split Scenario
-         and Instructional Text into separate tracked sections later. -->
-    <div class="track-progress">
-      <button type="button" class="btn-track" data-section-id="unit-scenario" aria-pressed="false">
-        <span class="track-icon" aria-hidden="true">&#10007;</span>
-        <span class="track-label">Work Complete</span>
-      </button>
-    </div>
+   
   </div>
 
     <!-- ================= END LESSON SECTION ================= -->
@@ -702,9 +684,49 @@
     </div>
   </section>
 
+  <section class="lesson" id="lesson-1-4" aria-labelledby="lesson-1-3-heading">
+    <div class="lesson-head">
+      <span class="lesson-num">Lesson 1.4</span>
+      <h2 id="lesson-1-3-heading">Lesson Title Here</h2>
+    </div>
+
+    <div class="block scenario-block">
+      <h3><span class="tag tag-scenario">Scenario</span></h3>
+      <p class="placeholder">Placeholder</p>
+    </div>
+
+    <div class="block instruction-block">
+      <h3><span class="tag tag-instruction">Instructional Text</span></h3>
+      <p class="placeholder">Placeholder</p>
+    </div>
+
+    <div class="block activity-block">
+      <h3><span class="tag tag-activity">Activity</span></h3>
+      <p class="placeholder">Placeholder</p>
+      <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
+        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
+      </ul>
+      <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.3 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch Activity
+      </a>
+    </div>
+
+
+    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
+         id ("lesson-1-3"). Change it whenever you copy this button
+         into a different section. -->
+    <div class="track-progress">
+      <button type="button" class="btn-track" data-section-id="lesson-1-4" aria-pressed="false">
+        <span class="track-icon" aria-hidden="true">&#10007;</span>
+        <span class="track-label">Work Complete</span>
+      </button>
+    </div>
+  </section>
+
   <section id="lesson-finished">
     <button type="button" class="btn-close" onclick="closeActivityWindow()">
-      <span aria-hidden="true">&#10003;</span> Finished — Close Window
+      <span aria-hidden="true">&#10003;</span> Lesson Complete — Close Window
     </button>
     <p id="close-fallback" class="close-fallback" hidden>
       You're all set — you can close this tab now.
