@@ -209,6 +209,9 @@
         <button type="button" class="action btn-amber" id="btn-eval">Evaluate my spec</button>
         <button type="button" class="action btn-outline" id="btn-copy">Copy my spec</button>
         <span class="copy-status" id="copy-status"></span>
+        <button type="button" class="action btn-outline" id="btn-save" aria-label="Save your spec as a downloadable text file">Save as TXT</button>
+        <span class="copy-status" id="save-status"></span>
+        <button type="button" class="action btn-outline" id="btn-close" aria-label="Finish the activity and close this window">Finished - Close window</button>
       </div>
 
       <!-- Assembled spec output -->
@@ -450,6 +453,61 @@
         if(ok2){ showSuccess(); } else { showFallback(); }
       }catch(e){ showFallback(); }
     }
+  });
+
+  // --- Save my spec as TXT ---
+  document.getElementById('btn-save').addEventListener('click', function(){
+    var allEmpty = !val('audience') && !val('task') && !val('steps') && !val('success');
+    var statusEl = document.getElementById('save-status');
+
+    if(allEmpty){
+      statusEl.textContent = 'Nothing to save yet, fill in the fields first.';
+      statusEl.classList.add('fail');
+      statusEl.classList.add('show');
+      announce('Nothing to save yet. Fill in the fields first.');
+      setTimeout(function(){ statusEl.classList.remove('show'); }, 3500);
+      return;
+    }
+
+    var text = compileSpecText();
+
+    try{
+      var blob = new Blob([text], {type:'text/plain'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'spec-connect-laptop-corpwifi.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+
+      statusEl.textContent = 'Saved as spec-connect-laptop-corpwifi.txt.';
+      statusEl.classList.remove('fail');
+      statusEl.classList.add('show');
+      announce('Spec saved as a text file.');
+      setTimeout(function(){ statusEl.classList.remove('show'); }, 3500);
+    }catch(e){
+      statusEl.textContent = 'Could not save the file. Try Copy my spec instead.';
+      statusEl.classList.add('fail');
+      statusEl.classList.add('show');
+      announce('Could not save the file. Try the copy button instead.');
+    }
+  });
+
+  // --- Finished: close window ---
+  document.getElementById('btn-close').addEventListener('click', function(){
+    var closeBtn = this;
+    announce('Closing this window.');
+    window.close();
+    // Some browsers block a script from closing a tab it did not open
+    // itself. If we are still here a moment later, close() was blocked -
+    // update the button's own label so the learner can see it is safe
+    // to close the tab by hand.
+    setTimeout(function(){
+      closeBtn.textContent = 'Activity complete - you can close this tab now';
+      announce('Activity complete. You can close this browser tab now.');
+    }, 400);
   });
 })();
 </script>
