@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find the Missing Field</title>
+<style>
+  :root{
+    --ink:#25306B; --ink2:#1C2657; --orange:#C9740B; --orangebg:#F2911B;
+    --green:#2E9E57; --greenwash:#F0F7F1; --grey:#6B7280; --notegrey:#4B5563;
+    --card:#F4F6FB; --light:#EEF1F8; --line:#D7DDF0; --warm:#FDF2E2; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:Arial,Helvetica,sans-serif; color:var(--ink2);
+    background:#fff; line-height:1.5; padding:20px 14px 40px;
+  }
+  .wrap{max-width:700px; margin:0 auto;}
+
+  .headrow{display:flex; align-items:flex-start; justify-content:space-between; gap:14px;}
+  .eyebrow{color:var(--orange); font-weight:bold; font-size:13px;
+    letter-spacing:.06em; text-transform:uppercase; margin:0 0 4px;}
+  h1{color:var(--ink); font-size:21px; margin:0; font-weight:bold;}
+  .chip{flex:0 0 auto; font-size:11px; font-weight:bold; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink); background:var(--light);
+    border:1px solid var(--line); padding:5px 11px; border-radius:20px;
+    white-space:nowrap; margin-top:2px;}
+
+  .lede{color:var(--grey); font-size:13.5px; margin:10px 0 22px;}
+
+  .example{border:1px solid var(--line); border-radius:10px; margin-bottom:18px; overflow:hidden;}
+  .ex-hd{background:var(--ink); color:var(--white); padding:11px 16px; font-size:13.5px; font-weight:bold;}
+  .ex-hd .n{color:#C7CCE8; font-weight:normal; font-size:11.5px; display:block; margin-bottom:2px;
+    text-transform:uppercase; letter-spacing:.04em;}
+  .ex-bd{padding:16px 18px;}
+
+  .field{margin-bottom:11px;}
+  .field:last-child{margin-bottom:0;}
+  .field .lbl{font-size:11px; font-weight:bold; color:var(--grey); text-transform:uppercase;
+    letter-spacing:.04em; margin-bottom:3px;}
+  .field .val{font-size:13.5px; color:var(--ink2);}
+  .field ol{margin:2px 0 0; padding-left:20px; font-size:13.5px; color:var(--ink2);}
+  .field li{margin-bottom:4px;}
+
+  .question{font-size:13px; font-weight:bold; color:var(--ink); margin:16px 0 10px;
+    padding-top:14px; border-top:1px solid var(--line);}
+
+  .choices{display:flex; flex-wrap:wrap; gap:8px;}
+  .choice{position:relative;}
+  .choice input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer;}
+  .choice label{display:block; font-size:13px; color:var(--ink2); background:var(--light);
+    border:1px solid var(--line); border-radius:20px; padding:7px 15px; cursor:pointer;}
+  .choice input:checked + label{background:var(--ink); color:var(--white); border-color:var(--ink);}
+  .choice input:focus-visible + label{outline:3px solid var(--orangebg); outline-offset:1px;}
+
+  .feedback{display:none; margin-top:14px; border-radius:8px; padding:12px 15px; font-size:13px;}
+  .feedback.show{display:block;}
+  .feedback.correct{background:var(--greenwash); border:1px solid var(--green);}
+  .feedback.incorrect{background:var(--warm); border:1px solid var(--orange);}
+  .feedback .verdict{font-weight:bold; margin-bottom:5px; display:flex; align-items:center; gap:6px;}
+  .feedback.correct .verdict{color:var(--green);}
+  .feedback.incorrect .verdict{color:var(--orange);}
+  .feedback .ans{color:var(--ink2); margin-bottom:5px;}
+  .feedback .why{color:var(--notegrey); font-style:italic;}
+
+  .actionrow{display:flex; justify-content:center; gap:10px; margin-top:6px;}
+  button.primary{
+    font-family:Arial; font-size:14px; font-weight:bold; color:var(--white);
+    background:var(--ink); border:none; border-radius:22px; padding:10px 24px; cursor:pointer;
+  }
+  button.primary:hover:not([disabled]){background:var(--ink2);}
+  button.primary:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+  button.primary[disabled]{opacity:.45; cursor:default;}
+
+  button.reset{
+    font-family:Arial; font-size:13px; font-weight:bold; color:var(--ink);
+    background:var(--white); border:1px solid var(--line); border-radius:20px;
+    padding:9px 20px; cursor:pointer; display:none;
+  }
+  button.reset.show{display:inline-block;}
+  button.reset:hover{border-color:var(--ink);}
+  button.reset:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+
+  .hint{text-align:center; font-size:12px; color:var(--grey); margin-top:8px;}
+
+  .finishrow{margin-top:26px; padding-top:18px; border-top:1px solid var(--line); text-align:center;}
+  button.finish{
+    font-family:Arial; font-size:13px; font-weight:bold; color:var(--ink);
+    background:var(--white); border:1px solid var(--line); border-radius:20px;
+    padding:9px 20px; cursor:pointer;
+  }
+  button.finish:hover{border-color:var(--ink);}
+  button.finish:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="headrow">
+    <div>
+      <p class="eyebrow">Activity 1.3</p>
+      <h1>Find the Missing Field</h1>
+    </div>
+    <span class="chip">Practice &middot; not scored</span>
+  </div>
+
+  <p class="lede">Each spec below is missing exactly one field. As you read, ask yourself: if you handed this exact spec to ChatGPT right now, what would it be forced to guess?</p>
+
+  <!-- EXAMPLE 1 -->
+  <div class="example">
+    <div class="ex-hd"><span class="n">Example 1</span>Connect a Loaner Laptop to CorpWiFi</div>
+    <div class="ex-bd">
+      <div class="field">
+        <div class="lbl">Audience</div>
+        <div class="val">Tier 1 support tech, no prior context on this ticket.</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Task</div>
+        <div class="val">Document how to connect a loaner laptop to CorpWiFi.</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Required steps</div>
+        <ol>
+          <li>Open Wi-Fi settings.</li>
+          <li>Select CorpWiFi from the network list.</li>
+          <li>Enter the passphrase.</li>
+          <li>Wait for the connection to complete.</li>
+        </ol>
+      </div>
+
+      <div class="question">Which field is missing from this spec?</div>
+      <div class="choices" id="ex1-choices" role="radiogroup" aria-label="Which field is missing from Example 1">
+        <span class="choice"><input type="radio" name="ex1" id="ex1-audience" value="Audience"><label for="ex1-audience">Audience</label></span>
+        <span class="choice"><input type="radio" name="ex1" id="ex1-task" value="Task"><label for="ex1-task">Task</label></span>
+        <span class="choice"><input type="radio" name="ex1" id="ex1-steps" value="Required steps"><label for="ex1-steps">Required steps</label></span>
+        <span class="choice"><input type="radio" name="ex1" id="ex1-success" value="Success state"><label for="ex1-success">Success state</label></span>
+      </div>
+
+      <div class="feedback" id="ex1-feedback">
+        <div class="verdict" id="ex1-verdict"></div>
+        <div class="ans"><strong>Missing field:</strong> Success state</div>
+        <div class="why">Without a success state, the AI does not know when the article is done, so it can pad the ending or stop before ever confirming the connection actually works.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE 2 -->
+  <div class="example">
+    <div class="ex-hd"><span class="n">Example 2</span>Connect a Company Phone to CorpWiFi</div>
+    <div class="ex-bd">
+      <div class="field">
+        <div class="lbl">Audience</div>
+        <div class="val">Tier 1 support tech, no prior context on this ticket.</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Task</div>
+        <div class="val">Document how to connect a company phone to CorpWiFi.</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Success state</div>
+        <div class="val">The phone connects and the user can reach the internet.</div>
+      </div>
+
+      <div class="question">Which field is missing from this spec?</div>
+      <div class="choices" id="ex2-choices" role="radiogroup" aria-label="Which field is missing from Example 2">
+        <span class="choice"><input type="radio" name="ex2" id="ex2-audience" value="Audience"><label for="ex2-audience">Audience</label></span>
+        <span class="choice"><input type="radio" name="ex2" id="ex2-task" value="Task"><label for="ex2-task">Task</label></span>
+        <span class="choice"><input type="radio" name="ex2" id="ex2-steps" value="Required steps"><label for="ex2-steps">Required steps</label></span>
+        <span class="choice"><input type="radio" name="ex2" id="ex2-success" value="Success state"><label for="ex2-success">Success state</label></span>
+      </div>
+
+      <div class="feedback" id="ex2-feedback">
+        <div class="verdict" id="ex2-verdict"></div>
+        <div class="ans"><strong>Missing field:</strong> Required steps</div>
+        <div class="why">Without required steps, the AI has to invent its own sequence from scratch, so it is more likely to guess a menu label or skip a step Tier 1 actually needs.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actionrow">
+    <button type="button" class="primary" id="submitBtn" disabled>Check my answers</button>
+    <button type="button" class="reset" id="resetBtn">Try again</button>
+  </div>
+  <p class="hint" id="hintText">Select an answer for both examples to check your work.</p>
+
+  <div class="finishrow">
+    <button type="button" class="finish" id="closeBtn" aria-label="Finish the activity and close this window">Finished - Close window</button>
+  </div>
+
+  <p class="sr-only" id="liveRegion" aria-live="polite"></p>
+
+</div>
+
+<script>
+(function(){
+  var answerKey = { ex1: 'Success state', ex2: 'Required steps' };
+  var submitBtn = document.getElementById('submitBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var hintText = document.getElementById('hintText');
+  var live = document.getElementById('liveRegion');
+  var submitted = false;
+
+  function selected(name){
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : null;
+  }
+
+  function checkReady(){
+    if(submitted) return;
+    var ready = selected('ex1') && selected('ex2');
+    submitBtn.disabled = !ready;
+    hintText.style.display = ready ? 'none' : 'block';
+  }
+
+  ['ex1','ex2'].forEach(function(name){
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(input){
+      input.addEventListener('change', checkReady);
+    });
+  });
+
+  function reveal(name){
+    var pick = selected(name);
+    var correct = pick === answerKey[name];
+    var fb = document.getElementById(name + '-feedback');
+    var verdict = document.getElementById(name + '-verdict');
+
+    fb.classList.add('show');
+    fb.classList.add(correct ? 'correct' : 'incorrect');
+    verdict.innerHTML = correct
+      ? '<span>&#10003;</span> Correct'
+      : '<span>&#8226;</span> Not quite, you picked ' + pick + '.';
+
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(input){
+      input.disabled = true;
+    });
+  }
+
+  submitBtn.addEventListener('click', function(){
+    submitted = true;
+    reveal('ex1');
+    reveal('ex2');
+    submitBtn.style.display = 'none';
+    resetBtn.classList.add('show');
+    hintText.style.display = 'none';
+    live.textContent = 'Answers checked. Review the feedback under each example.';
+  });
+
+  resetBtn.addEventListener('click', function(){
+    submitted = false;
+    ['ex1','ex2'].forEach(function(name){
+      document.querySelectorAll('input[name="' + name + '"]').forEach(function(input){
+        input.checked = false;
+        input.disabled = false;
+      });
+      var fb = document.getElementById(name + '-feedback');
+      fb.classList.remove('show','correct','incorrect');
+    });
+    submitBtn.style.display = 'inline-block';
+    submitBtn.disabled = true;
+    resetBtn.classList.remove('show');
+    hintText.style.display = 'block';
+    live.textContent = 'Reset. Choose an answer for both examples.';
+  });
+
+  // --- Finished: close window ---
+  var closeBtn = document.getElementById('closeBtn');
+  closeBtn.addEventListener('click', function(){
+    live.textContent = 'Closing this window.';
+    window.close();
+    // Some browsers block a script from closing a tab it did not open
+    // itself. If we are still here a moment later, close() was blocked -
+    // update the button's own label so the learner can see it is safe
+    // to close the tab by hand.
+    setTimeout(function(){
+      closeBtn.textContent = 'Activity complete - you can close this tab now';
+      live.textContent = 'Activity complete. You can close this browser tab now.';
+    }, 400);
+  });
+})();
+</script>
+
+</body>
+</html>
