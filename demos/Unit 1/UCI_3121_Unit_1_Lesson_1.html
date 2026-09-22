@@ -248,28 +248,26 @@
   }
 
   /* ---------------------------------------------------------------
-     Contents-list completion checkbox. Empty box by default; once
-     the matching "Work Complete" button (same data-tracks /
-     data-section-id value) is clicked, the script below fills it in
-     with a green check. See the .btn-track comment further down for
-     how the two are linked.
+     Lesson Contents completion state. Each entry's visible text
+     lives in .toc-label; that, plus a screen-reader-only status
+     announcement, sits inside .toc-row (which carries data-tracks).
+     When the matching "Work Complete" button (same data-tracks /
+     data-section-id value) is clicked, the script below toggles
+     .toc-row's is-complete class, which restyles the label as
+     struck-through italic text with a green strike, in place of the
+     old checkbox. Italic and strikethrough are both independent of
+     color, so completion is never conveyed by color alone; the
+     sr-only text still announces the change too, since strikethrough
+     styling isn't reliably read aloud by every screen reader.
+     See the .btn-track comment further down for how the two halves
+     are linked.
      --------------------------------------------------------------- */
-  .toc-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.1em;
-    height: 1.1em;
-    border: 1.5px solid var(--muted);
-    border-radius: 3px;
-    flex-shrink: 0;
+  .toc-row.is-complete .toc-label {
+    font-style: italic;
+    text-decoration: line-through;
+    text-decoration-color: #2E9E57;
+    text-decoration-thickness: 2px;
   }
-  .toc-status-icon { font-size: 0.7rem; line-height: 1; color: transparent; }
-  .toc-status[data-complete="true"] {
-    border-color: #2E9E57;
-    background: rgba(46,157,87,0.18);
-  }
-  .toc-status[data-complete="true"] .toc-status-icon { color: #2E9E57; }
   .toc-demo-hint { color: var(--muted); font-size: 0.8125rem; font-style: italic; }
 
   /* ---- Main content rhythm ---- */
@@ -337,6 +335,20 @@
     white-space: nowrap;
   }
   .lesson-head h2 { margin: 0; }
+
+  /* Green check shown next to a lesson's own heading once its "Work
+     Complete" button (found via .btn-track's data-section-id, further
+     down) is toggled on. Lives inside the <h2> itself, right after the
+     title text, so it reads as part of the lesson name; aria-hidden
+     because the heading text is this section's accessible name via
+     aria-labelledby, and a screen reader already gets the same
+     completion state from the button's own aria-pressed / label when
+     it reaches it. Hidden by default; the script below un-hides it. */
+  .lesson-check {
+    color: #2E9E57;
+    margin-left: 0.5em;
+    font-size: 0.85em;
+  }
 
   .lesson .block {
     background: var(--navy);
@@ -619,25 +631,24 @@
       </button>
     </div>
     <p class="unit-meta">Lesson 1 of 5</p>
-    <h1>Lesson #: Lesson Name</h1>
+    <h1>Lesson 1: Creating IT Documentation with AI</h1>
     <p class="unit-tagline"><strong>Objectives:</strong></p>
     <ul class="unit-objectives">
-      <li>Objective 1</li>
-      <li>Objective 2</li>
-      <li>Objective 3</li>
-      <li>Objective 4</li>
+      <li><u>Objective 1:</u> Write a specification for a support document, audience, task, required steps, and success state before prompting the AI. </li>
+      <li><u>Objective 2:</u> Generate a draft knowledge base article from that spec and identify the assumptions and unverified claims the AI flagged in its output. </li>
+      <li><u>Objective 3:</u> Verify the draft against the real system and knowledge base (V1–V5)* confirming menu labels, procedures, and facts, and removing any PII before publishing.  </li>
+      <li><u>Objective 4:</u> Test the article with a reader to separate "accurate" from "usable," logging where the reader hesitates, and decide whether to publish or hold.</li>
     </ul>
 
-    <nav class="page-nav" aria-label="On this page">
-      <p>Lesson Contents</p>
-      <ol>
-        <li><a href="#lesson-0">Introduction</li>
-        <li><a href="#lesson-1-1">Lesson 1.1</a><span class="toc-status" data-tracks="lesson-1-1"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
-        <li><a href="#lesson-1-2">Lesson 1.2</a><span class="toc-status" data-tracks="lesson-1-2"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
-        <li><a href="#lesson-1-3">Lesson 1.3</a><span class="toc-status" data-tracks="lesson-1-3"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
-        <li><a href="#lesson-1-4">Lesson 1.4</a><span class="toc-status" data-tracks="lesson-1-4"><span class="toc-status-icon" aria-hidden="true">&#10003;</span><span class="sr-only toc-status-text">Not complete</span></span></li>
-      </ol>
-    </nav>
+    <div class="block instruction-block">
+         <h3><span class="tag tag-instruction">Lesson Contents</h3>
+           <ul class="toc-list">
+        <li>Inroduction</li>
+        <li><span class="toc-row" data-tracks="lesson-1-1"><span class="toc-label">Lesson 1.1 - Worked example: a spec for a similar ticket</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><span class="toc-row" data-tracks="lesson-1-2"><span class="toc-label">Lesson 1.2 - Self-directed practice: write your own spec</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><span class="toc-row" data-tracks="lesson-1-3"><span class="toc-label">Lesson 1.3 - Self-check: find the missing field</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+           </ul>
+     
   </div>
 </header>
 
@@ -664,15 +675,17 @@
   <div class="unit-intro">
     <section class="block" id="unit-scenario" aria-labelledby="unit-scenario-heading">
       <h2 id="unit-scenario-heading"><span class="tag tag-scenario">Scenario</span></h2>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">Your first morning on the Service Desk at Bellwood Group starts the same way every shift will: a ticket queue with your name on it. Your shift lead dropped one in before you logged in. A new hire’s laptop will not connect to CorpWiFi, the company’s wireless network, and someone needs to document how to fix it. You could ask ChatGPT to write the whole thing right now. It would probably sound right. That is exactly the problem this module solves</p>
+      <h3>Current Ticket You Are Working</h3>          
+           <div class="snippet">
+            <pre id="snippet-image"><code>&lt;figure class="image-block"&gt;
+  &lt;img src="IMAGE_URL_HERE" alt="Placeholder: describe what this image shows for screen-reader users" loading="lazy"&gt;
+  &lt;figcaption class="image-caption"&gt;Placeholder: optional one-line caption or credit.&lt;/figcaption&gt;  
+&lt;/figure&gt;</code></pre>
+    </div>
     </section>
 
-    <section class="block" aria-labelledby="unit-instruction-heading">
-      <h2 id="unit-instruction-heading"><span class="tag tag-instruction">Instructional Text</span></h2>
-      <p class="placeholder">Placeholder</p>
-    </section>
-
-    <section class="block activity-block" aria-labelledby="unit-activity-heading">
+      <section class="block activity-block" aria-labelledby="unit-activity-heading">
       <h2 id="unit-activity-heading"><span class="tag tag-activity">What You Will Need</span></h2>
       <p class="placeholder">Placeholder</p>
       <ul class="activity-links">
@@ -691,30 +704,53 @@
   <section class="lesson" id="lesson-1-1" aria-labelledby="lesson-1-1-heading">
     <div class="lesson-head">
       <span class="lesson-num">Lesson 1.1</span>
-      <h2 id="lesson-1-1-heading">Lesson Title Here</h2>
+      <h2 id="lesson-1-1-heading">Worked example: a spec for a similar ticket<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
     </div>
 
     <div class="block scenario-block">
       <h3><span class="tag tag-scenario">Scenario</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">It would take about thirty seconds to open ChatGPT and get something that reads like an answer. That is exactly the shortcut this lesson asks you to skip. Before you touch the AI at all, you write down, in plain terms, exactly what "done" looks like for this ticket, the same way a senior tech would before touching any request. Ten minutes spent here saves an afternoon of guessing later.. </p>
+    <h4>Your Notes:</h4>
+    <ul><li>Wi-Fi already shows "Connected" — that's not what's broken</li><li>A real page has to load, not just the connected icon</li><li>Email has to sync too, not just one browser tab</li><li>No lingering "no internet" warning stays on the taskbar</li><li>New hire can do it again tomorrow without calling back</li></ul>
+  <p>You also research closed tickets to see if there have been issues like this in the past> You locate a ticket Senior tech closed last week for the contractor’s tablet instead of a laptop.</p>
+        
+<h5>Previous Ticket Closed By Senior Tech</h5>
+        <div class="snippet">
+            <pre id="snippet-image"><code>&lt;figure class="image-block"&gt;
+  &lt;img src="IMAGE_URL_HERE" alt="Placeholder: describe what this image shows for screen-reader users" loading="lazy"&gt;
+  &lt;figcaption class="image-caption"&gt;Placeholder: optional one-line caption or credit.&lt;/figcaption&gt;  
+&lt;/figure&gt;</code></pre>
     </div>
+   </div>
 
     <div class="block instruction-block">
-      <h3><span class="tag tag-instruction">Instructional Text</span></h3>
-      <p class="placeholder">Placeholder</p>
-    </div>
+         <h3><span class="tag tag-instruction">Instructions</h3>
+        <p class="placeholder"> A spec, short for specification, is just a short written description of what a finished piece of documentation has to do, written down before anyone starts drafting it.</p>
+    <p><b>What a spec does:</b></p>
+    <ul><li>Who will read it</li><li>The one thing it needs to help them do</li><li>The steps involved</li><li> How the reader will know it worked</li></ul>
+    <p>You write it first so you have something solid to measure the AI's draft against later, instead of judging a draft only by whether it sounds right.</p>
+    <p></p>
+        </div>
 
     <div class="block activity-block">
       <h3><span class="tag tag-activity">Activity</span></h3>
-      <p class="placeholder">Placeholder</p>
-      <ul class="activity-links">
-        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
-        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
+      <p class="placeholder"> 
+        <b>The Anatomy of a Specification (Spec)</b>
+    <p>Use the two links below to:</p>
+    <ul><li>Check out what a correct spec looks like, filled in for the example closed ticket:</li>
+  <li>Then, explore all four fields. Click the orange "why this matters" buttons to learn why each one earns its place before anyone opens ChatGPT.</li> </ul>
+        <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder</li>
+        <li><a href="RESOURCE_URL_HERE">Placeholder</a></li>
       </ul>
-      <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.1 activity in a new tab">
-        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch Activity
+           <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - View a Correct Spec Activity
       </a>
-    </div>
+      <br>
+           <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Explore a Spec Activity
+      </a>
+          </div>
   
     <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
          id ("lesson-1-1"). Change it whenever you copy this button
@@ -729,28 +765,33 @@
     <section class="lesson" id="lesson-1-2" aria-labelledby="lesson-1-2-heading">
     <div class="lesson-head">
       <span class="lesson-num">Lesson 1.2</span>
-      <h2 id="lesson-1-2-heading">Lesson Title Here</h2>
+      <h2 id="lesson-1-2-heading">Self-directed practice: write your own spec<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
+    
     </div>
 
     <div class="block scenario-block">
       <h3><span class="tag tag-scenario">Scenario</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">You have reviewed the previous spec and ticket. You now prepare to write your own spec for issue with the new hire's laptop.</p>
     </div>
 
     <div class="block instruction-block">
       <h3><span class="tag tag-instruction">Instructional Text</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">You now write your own spec for the ticket you are working on. Your task to document: “How to connect a new laptop to the company Wi-Fi.” Open the spec template linked below and fill in every field:</p>
+        <ol><li><b>Audience -</b> Who reads this and what do they already know?</li><li><b>Task -</b>The one thing this article helps the reader do.</li><li><b>Required steps -</b>The steps you believe are involved, numbered.</li><li><b>Success state -</b>How the reader knows they are done.</li></ol>
+      <p><u>Do not open ChatGPT yet.</u> You are writing the yardstick first. </p>Save your finished spec - you will paste it into ChatGPT in Lesson 1.2, and you will check the AI’s draft against it in Lesson 1.3.</p>
     </div>
 
     <div class="block activity-block">
       <h3><span class="tag tag-activity">Activity</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">You are writing the yardstick first.</p>
+      <p>Use the tool below to write your first spec:</p>
+      <ul>Copy & Save your finished spec using Notepad, Word, or other tool.,</ul>
+      <ul>You will use it in future work.</ul>
       <ul class="activity-links">
-        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
-        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
-      </ul>
+        <li><a href="ACTIVITY_URL_HERE">Placeholder</a></li>
+            </ul>
       <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
-        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch Activity
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Spec Builder Tool
       </a>
     </div>
     <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
@@ -766,17 +807,35 @@
     <section class="lesson" id="lesson-1-3" aria-labelledby="lesson-1-3-heading">
     <div class="lesson-head">
       <span class="lesson-num">Lesson 1.3</span>
-      <h2 id="lesson-1-3-heading">Lesson Title Here</h2>
+      <h2 id="lesson-1-3-heading">Self-Check: Find the Missing Field<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
     </div>
 
     <div class="block scenario-block">
       <h3><span class="tag tag-scenario">Scenario</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <p class="placeholder">You saved your spec and have it ready to use in a prompt.</p>
+      <p> Before you move on, you give your spec one final review.</p>
     </div>
 
     <div class="block instruction-block">
-      <h3><span class="tag tag-instruction">Instructional Text</span></h3>
-      <p class="placeholder">Placeholder</p>
+      <h3><span class="tag tag-instruction">Instructions</span></h3>
+      <p class="placeholder">Look at two specs that are not yours. Each is missing exactly one field, and the gap
+      does not always jump out at you. That is deliberate: an incomplete spec is supposed to look finished.</p>
+      <p>The purpose here is not memorizing four field names. It is training your
+      eye to catch a spec that looks complete but is not, before that gap costs
+      you a vague draft two lessons from now. </p>
+      <p>As you read each example below,
+      ask yourself the question a senior tech asks without thinking about it:
+      if I handed this exact spec to ChatGPT right now, what would it be
+      forced to guess?</p>
+
+<p>In the activity, two example specs display, each missing exactly one field. Pick the
+missing field from a short list for each one. <p>On submit, see which you
+got right, and, per item, read the model answer plus one sentence on how
+that specific omission would have degraded the AI's draft:</p>
+<ul><li>A vague audience it could not write for</li>
+  <li>A task it had to infer</li>
+  <li>Steps it had to invent an order for</li>
+  <li>A success state it had no way to check against</li>
     </div>
 
     <div class="block activity-block">
@@ -787,8 +846,9 @@
         <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
       </ul>
       <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.3 activity in a new tab">
-        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch Activity
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Self-Check Activity
       </a>
+      
     </div>
 
 
@@ -802,47 +862,6 @@
       </button>
     </div>
   </section>
-
-  <section class="lesson" id="lesson-1-4" aria-labelledby="lesson-1-3-heading">
-    <div class="lesson-head">
-      <span class="lesson-num">Lesson 1.4</span>
-      <h2 id="lesson-1-3-heading">Lesson Title Here</h2>
-    </div>
-
-    <div class="block scenario-block">
-      <h3><span class="tag tag-scenario">Scenario</span></h3>
-      <p class="placeholder">Placeholder</p>
-    </div>
-
-    <div class="block instruction-block">
-      <h3><span class="tag tag-instruction">Instructional Text</span></h3>
-      <p class="placeholder">Placeholder</p>
-    </div>
-
-    <div class="block activity-block">
-      <h3><span class="tag tag-activity">Activity</span></h3>
-      <p class="placeholder">Placeholder</p>
-      <ul class="activity-links">
-        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
-        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
-      </ul>
-      <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.3 activity in a new tab">
-        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch Activity
-      </a>
-    </div>
-
-
-    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
-         id ("lesson-1-3"). Change it whenever you copy this button
-         into a different section. -->
-    <div class="track-progress">
-      <button type="button" class="btn-track" data-section-id="lesson-1-4" aria-pressed="false">
-        <span class="track-icon" aria-hidden="true">&#10007;</span>
-        <span class="track-label">Work Complete</span>
-      </button>
-    </div>
-  </section>
-
   <section id="lesson-finished">
     <button type="button" class="btn-close" onclick="closeActivityWindow()">
       <span aria-hidden="true">&#10003;</span> Lesson Complete — Close Window
@@ -949,18 +968,18 @@
 &lt;/figure&gt;</code></pre>
     </div>
 
-    <h3>"Work Complete" section-tracking button + Lesson Contents checkbox</h3>
-    <p class="snippet-note">Two pieces that go in two different places, linked by one shared identifier. Drop the button at the end of any section a learner should be able to mark done; drop the matching contents-list item in the <code>&lt;ol&gt;</code> inside the header's Lesson Contents nav. <strong>Give both the same identifier</strong> — the button's <code>data-section-id</code> and the contents item's <code>data-tracks</code> — and that's the only edit needed on either one. Click the button below to see the checkbox next to it react; that's exactly what happens with the real pair anywhere on the page.</p>
+    <h3>"Work Complete" section-tracking button + Lesson Contents entry</h3>
+    <p class="snippet-note">Two pieces that go in two different places, linked by one shared identifier. Drop the button at the end of any section a learner should be able to mark done; drop the matching contents-list item in the <code>&lt;ul&gt;</code> inside the header's Lesson Contents nav. <strong>Give both the same identifier</strong> — the button's <code>data-section-id</code> and the contents item's <code>data-tracks</code> — and that's the only edit needed on either one. Click the button below to see the label next to it react; that's exactly what happens with the real pair anywhere on the page.</p>
     <div class="btn-preview-row">
       <button type="button" class="btn-track" data-section-id="component-library-demo" aria-pressed="false">
         <span class="track-icon" aria-hidden="true">&#10007;</span>
         <span class="track-label">Work Complete</span>
       </button>
-      <span class="toc-status" data-tracks="component-library-demo">
-        <span class="toc-status-icon" aria-hidden="true">&#10003;</span>
+      <span class="toc-row" data-tracks="component-library-demo">
+        <span class="toc-label">Sample lesson title</span>
         <span class="sr-only toc-status-text">Not complete</span>
       </span>
-      <span class="toc-demo-hint">&larr; this checkbox is wired to the button on the left</span>
+      <span class="toc-demo-hint">&larr; this label is wired to the button on the left</span>
     </div>
     <div class="snippet">
       <button class="copy-btn" data-target="snippet-track" type="button">Copy code</button>
@@ -974,27 +993,30 @@
   &lt;/button&gt;
 &lt;/div&gt;
 
-&lt;!-- 2) THE CONTENTS-LIST ITEM — place inside the &lt;ol&gt; in the
+&lt;!-- 2) THE CONTENTS-LIST ITEM — place inside the &lt;ul&gt; in the
      header's Lesson Contents nav. data-tracks must be the EXACT
      SAME value as data-section-id above — that match is what
-     links this checkbox to that button. Point the href at the
-     section's own id so the link still jumps there too. --&gt;
+     links this entry to that button. Point the href at the
+     section's own id so the link still jumps there too. On
+     completion the label turns italic with a green strikethrough;
+     keep the toc-row span wrapping the label and the sr-only text
+     together, since that's what the script toggles. --&gt;
 &lt;li&gt;
-  &lt;a href="#CHANGE_ME"&gt;Section Title Here&lt;/a&gt;
-  &lt;span class="toc-status" data-tracks="CHANGE_ME"&gt;
-    &lt;span class="toc-status-icon" aria-hidden="true"&gt;&amp;#10003;&lt;/span&gt;
+  &lt;span class="toc-row" data-tracks="CHANGE_ME"&gt;
+    &lt;a href="#CHANGE_ME" class="toc-label"&gt;Section Title Here&lt;/a&gt;
     &lt;span class="sr-only toc-status-text"&gt;Not complete&lt;/span&gt;
   &lt;/span&gt;
 &lt;/li&gt;</code></pre>
     </div>
 
     <h3>Empty lesson section (Scenario + Instructional Text + Activity + Video)</h3>
+    <p class="snippet-note">The heading already includes a <code>lesson-check</code> span, a green check hidden by default. If you also add a "Work Complete" tracking button to this section (see the snippet above), it un-hides that check automatically once the learner marks the section done, no extra wiring needed, since the script finds it by walking up to the section that contains the button. If you don't add a tracking button, the hidden span is harmless and can stay.</p>
     <div class="snippet">
       <button class="copy-btn" data-target="snippet-lesson" type="button">Copy code</button>
       <pre id="snippet-lesson"><code>&lt;section class="lesson" id="lesson-X-Y" aria-labelledby="lesson-X-Y-heading"&gt;
   &lt;div class="lesson-head"&gt;
     &lt;span class="lesson-num"&gt;Lesson X.Y&lt;/span&gt;
-    &lt;h2 id="lesson-X-Y-heading"&gt;Lesson Title Here&lt;/h2&gt;
+    &lt;h2 id="lesson-X-Y-heading"&gt;Lesson Title Here&lt;span class="lesson-check" aria-hidden="true" hidden&gt;&amp;#10003;&lt;/span&gt;&lt;/h2&gt;
   &lt;/div&gt;
 
   &lt;div class="block scenario-block"&gt;
@@ -1064,7 +1086,17 @@
   });
 
   function closeActivityWindow() {
-    window.close();
+    try {
+      window.close();
+    } catch (e) {
+      // Some embedding contexts (a sandboxed iframe, e.g. a Canvas LTI
+      // embed, is the likely one here) throw instead of silently
+      // refusing to close a tab/frame the script didn't open itself.
+      // Either way, fall through to the same fallback message below,
+      // without this catch, that throw would skip the setTimeout call
+      // entirely, so the button would neither close the window nor
+      // show the fallback text.
+    }
     setTimeout(function () {
       var msg = document.getElementById('close-fallback');
       if (msg) msg.hidden = false;
@@ -1072,7 +1104,7 @@
   }
 
   /* -----------------------------------------------------------------
-     "Work Complete" section-tracking buttons, paired with checkboxes
+     "Work Complete" section-tracking buttons, paired with entries
      in the Lesson Contents list at the top of the page.
 
      HOW TO ADD ONE TO A NEW SECTION (both halves — see the Component
@@ -1080,10 +1112,10 @@
        1. Copy a .btn-track button into the new section and give it a
           unique data-section-id (the section's own id is the easiest
           choice, e.g. data-section-id="lesson-1-4").
-       2. Copy a Lesson Contents <li> into the <ol> in the header and
-          give its .toc-status span the SAME value in data-tracks —
+       2. Copy a Lesson Contents <li> into the <ul> in the header and
+          give its .toc-row span the SAME value in data-tracks —
           e.g. data-tracks="lesson-1-4". That match is what tells the
-          script which contents-list checkbox belongs to which button;
+          script which contents-list entry belongs to which button;
           nothing else needs to change on either end.
 
      WHY THE IDENTIFIER MATTERS:
@@ -1095,7 +1127,7 @@
        template is duplicated for other units — cookies are shared per
        website, not per page). If a button's data-section-id has no
        matching data-tracks in the contents list, the button still
-       works fine on its own — it just has nothing to check off.
+       works fine on its own — it just has nothing to mark done.
      ----------------------------------------------------------------- */
 
   // Reads one cookie's value by name; returns null if it isn't set.
@@ -1129,32 +1161,48 @@
   }
 
   // Finds the Lesson Contents entry whose data-tracks matches this
-  // section's id and fills in (or clears) its checkbox. If a section
+  // section's id and marks it complete (or clears it). If a section
   // doesn't have a matching contents-list entry, this quietly does
   // nothing — the button still works on its own.
   function setTocStatus(sectionId, complete) {
-    var status = document.querySelector('.toc-status[data-tracks="' + sectionId + '"]');
-    if (!status) return;
-    status.setAttribute('data-complete', complete ? 'true' : 'false');
-    var text = status.querySelector('.toc-status-text');
+    var row = document.querySelector('.toc-row[data-tracks="' + sectionId + '"]');
+    if (!row) return;
+    row.classList.toggle('is-complete', complete);
+    var text = row.querySelector('.toc-status-text');
     if (text) text.textContent = complete ? 'Completed' : 'Not complete';
+  }
+
+  // Shows (or hides) the green check next to a lesson's own heading.
+  // Takes the <section class="lesson"> itself rather than an id, so it
+  // works purely by DOM position, with no separate identifier to keep
+  // in sync, unlike the button/TOC pairing above. If a section has no
+  // .lesson-check span in its heading, this quietly does nothing.
+  function setLessonHeadingCheck(sectionEl, complete) {
+    if (!sectionEl) return;
+    var check = sectionEl.querySelector('.lesson-check');
+    if (check) check.hidden = !complete;
   }
 
   document.querySelectorAll('.btn-track').forEach(function (btn) {
     // This is the link between a button and its Lesson Contents entry:
-    // the button's data-section-id and the contents-list checkbox's
+    // the button's data-section-id and the contents-list entry's
     // data-tracks attribute must be the SAME value. Whatever you set
     // data-section-id to on a new button, give the matching contents
     // list <li>'s data-tracks the identical value (see the Component
     // Library for both snippets together).
     var sectionId = btn.dataset.sectionId || 'section';
     var cookieName = 'work_complete_' + sectionId;
+    // The button's own enclosing <section class="lesson">, if it's
+    // inside one (the Component Library demo button isn't, and that's
+    // fine, setLessonHeadingCheck no-ops on a missing section).
+    var sectionEl = btn.closest('.lesson');
 
-    // Updates the button AND its contents-list checkbox together, so
-    // they can never fall out of sync.
+    // Updates the button, its contents-list entry, AND its heading
+    // check together, so none of the three can fall out of sync.
     function applyState(complete) {
       setTrackButtonState(btn, complete);
       setTocStatus(sectionId, complete);
+      setLessonHeadingCheck(sectionEl, complete);
     }
 
     // On page load, restore whatever this section's cookie says —
