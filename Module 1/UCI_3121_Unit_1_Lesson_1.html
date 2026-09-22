@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 1: Creating IT Documentation with AI — Series 101 Unit Template</title>
+<meta name="description" content="Series 101 · AI Skills for IT Support — Unit page template.">
+
+<!--
+  =====================================================================
+  SERIES 101 — UNIT PAGE TEMPLATE
+  =====================================================================
+  What this file is:
+    A master template for delivering one Unit (formerly "Module") of
+    Series 101 as a standalone HTML page. Canvas is used only to host
+    the page (via LTI/external URL) and record completion — the actual
+    instruction lives here.
+
+  How to use it for a new Unit:
+    1. Duplicate this file and rename it for the target Unit
+       (e.g. Series_101_Unit_2_Page_Daniel_Russo.html).
+    2. Update the <title>, the header eyebrow/H1/tagline, and the
+       "Unit X of 5" meta line.
+    3. Duplicate the block marked "LESSON SECTION — duplicate me" once
+       per lesson, in order, and fill in its Scenario, Instructional
+       Text, Activity block (instructions + links + launch button), and
+       Video embed.
+    4. Update every ACTIVITY_URL_HERE, VIDEO_URL_HERE and
+       TRANSCRIPT_URL_HERE placeholder.
+    5. The "COMPONENT LIBRARY" section near the bottom of the body is
+       a builder reference, not learner-facing content — it carries
+       the HTML `hidden` attribute, so it never renders for a learner
+       who opens this page normally. To see it yourself while
+       building, add ?library=1 to the page's URL in your browser,
+       e.g.:
+         Series_101_Unit_2_Page_Daniel_Russo.html?library=1
+       Remove ?library=1 (or just close that tab) to go back to the
+       normal learner view — nothing needs to be edited in the file
+       either way, since the flag only affects that one page load.
+       You can still delete the whole section once a Unit page is
+       completely finished, if you'd rather ship a smaller file, but
+       it's no longer required before publishing.
+  =====================================================================
+-->
+
+<!-- BUILDER MODE: add ?library=1 to this page's URL to reveal the
+     Component Library reference section at the bottom of the page
+     (hidden from learners by default). See "How to use it" above. -->
+
+<!-- THEME (runs before <style> so a saved "light" choice applies before
+     first paint, instead of flashing dark-then-light). The toggle
+     button and the rest of the persistence logic are in the script at
+     the bottom of the page; this just reads the same cookie early. -->
+<script>
+  (function () {
+    var m = document.cookie.match('(?:^|; )series101_theme=([^;]*)');
+    if (m && decodeURIComponent(m[1]) === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+
+<style>
+  :root {
+    /* ---- Per Scholas brand palette (see /assets/design_system.py) ---- */
+    --navy-deep: #1C2657;   /* page background */
+    --navy:      #25306B;   /* panel / header background */
+    --orange:    #F2911B;   /* buttons, accent labels (ADA/WCAG-checked below) */
+    --orange-text: #F2911B; /* text-safe variant of --orange (links, eyebrow, tags).
+                                Same value here because F2911B already clears 4.5:1 as
+                                text on this dark background; the light theme below
+                                gives this its own darker value, since F2911B drops to
+                                ~2:1 as text once the background flips light. --orange
+                                itself stays put in both themes, since it's only ever
+                                a solid fill (buttons, tag-activity), not text. */
+    --tag-scenario-bg: rgba(242,145,27,0.14); /* Scenario tag's wash; swapped for a
+                                solid warm wash in light mode (see below) because the
+                                translucent version doesn't leave enough contrast for
+                                --orange-text once the page is light. */
+    --orange-text-on: #1C2657; /* text color used ON the orange buttons */
+    --white:     #FFFFFF;
+    --body-text: #EDF0FA;   /* near-white body copy, ~14:1 on navy-deep */
+    --muted:     #C7CDE8;   /* secondary / placeholder text, ~9:1 on navy-deep */
+    --line:      rgba(255,255,255,0.14);
+    --focus:     #FFFFFF;
+
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2.5rem;
+    --space-5: 4rem;
+
+    --radius: 6px;
+    --maxw: 760px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--navy-deep);
+    color: var(--body-text);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--space-2); }
+
+  a { color: var(--orange-text); }
+  a:hover { text-decoration: none; }
+
+  /* ---- Visible focus for every interactive element (WCAG 2.4.7) ---- */
+  a:focus-visible,
+  button:focus-visible,
+  .btn-primary:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  /* The solid-orange button needs its own ring: white alone is
+     low-contrast against orange, so a dark "moat" plus a white outer
+     ring gives two compliant boundaries regardless of what's behind
+     the button. Other button variants sit on the dark navy card, so
+     the plain white outline above already has plenty of contrast. */
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--navy-deep), 0 0 0 6px var(--white);
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--orange);
+    color: var(--orange-text-on);
+    font-weight: 700;
+    padding: var(--space-1) var(--space-2);
+    z-index: 10;
+    border-radius: 0 0 var(--radius) 0;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ---- Header ---- */
+  .site-header {
+    background: var(--navy);
+    border-bottom: 1px solid var(--line);
+    padding: var(--space-4) 0 var(--space-3);
+  }
+  .eyebrow {
+    color: var(--orange-text);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    color: var(--white);
+    font-size: 1.875rem;
+    line-height: 1.25;
+    margin: 0 0 0.5rem;
+  }
+  .unit-tagline {
+    color: var(--muted);
+    font-size: 1.0625rem;
+    margin: 0 0 var(--space-2);
+  }
+  .unit-objectives {
+    color: var(--muted);
+    font-size: 1.0625rem;
+    margin: 0 0 var(--space-2);
+    padding-left: 1.25rem;
+  }
+  .unit-objectives li { margin-bottom: 0.25rem; }
+  .unit-meta {
+    color: var(--muted);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  /* ---- On-page navigation ---- */
+  .page-nav {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--line);
+  }
+  .page-nav p {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .page-nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+  .page-nav li { display: flex; align-items: center; gap: 0.35rem; }
+  .page-nav a { color: var(--body-text); font-size: 0.9375rem; text-decoration: underline; }
+  .page-nav a:hover { color: var(--orange-text); }
+
+  /* ---- Theme toggle ---- */
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.5rem;
+  }
+  .header-top .eyebrow { margin: 0; }
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    color: var(--body-text);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font: 700 0.8125rem Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover { border-color: var(--orange-text); color: var(--orange-text); }
+  .theme-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .theme-toggle-icon { font-size: 1em; }
+
+  /* Visually hidden but still announced by screen readers — used for
+     the text equivalent of the checkmark-only status indicators below. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---------------------------------------------------------------
+     Lesson Contents completion state. Each entry's visible text
+     lives in .toc-label; that, plus a screen-reader-only status
+     announcement, sits inside .toc-row (which carries data-tracks).
+     When the matching "Work Complete" button (same data-tracks /
+     data-section-id value) is clicked, the script below toggles
+     .toc-row's is-complete class, which restyles the label as
+     struck-through italic text with a green strike, in place of the
+     old checkbox. Italic and strikethrough are both independent of
+     color, so completion is never conveyed by color alone; the
+     sr-only text still announces the change too, since strikethrough
+     styling isn't reliably read aloud by every screen reader.
+     See the .btn-track comment further down for how the two halves
+     are linked.
+     --------------------------------------------------------------- */
+  .toc-row.is-complete .toc-label {
+    font-style: italic;
+    text-decoration: line-through;
+    text-decoration-color: #2E9E57;
+    text-decoration-thickness: 2px;
+  }
+  .toc-demo-hint { color: var(--muted); font-size: 0.8125rem; font-style: italic; }
+
+  /* ---- Main content rhythm ---- */
+  main { padding: var(--space-4) 0 var(--space-5); }
+
+  section.block, div.block {
+    margin-bottom: var(--space-3);
+  }
+
+  h2 {
+    color: var(--white);
+    font-size: 1.375rem;
+    margin: 0 0 var(--space-2);
+  }
+
+  /* Section "tag" label — reuses the brand's eyebrow motif for Scenario /
+     Instructional Text callouts. */
+  .tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin: 0 0 0.5rem;
+  }
+  .tag-scenario   { color: var(--orange-text); background: var(--tag-scenario-bg); }
+  .tag-instruction{ color: var(--white);  background: rgba(255,255,255,0.10); }
+  .tag-activity   { color: var(--orange-text-on); background: var(--orange); }
+
+  p.placeholder {
+    font-style: italic;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ---- Unit-level intro blocks ---- */
+  .unit-intro .block {
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+  }
+  .unit-intro h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+
+  /* ---- Lesson sections ---- */
+  .lesson {
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .lesson-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .lesson-num {
+    color: var(--orange-text);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .lesson-head h2 { margin: 0; }
+
+  /* Green check shown next to a lesson's own heading once its "Work
+     Complete" button (found via .btn-track's data-section-id, further
+     down) is toggled on. Lives inside the <h2> itself, right after the
+     title text, so it reads as part of the lesson name; aria-hidden
+     because the heading text is this section's accessible name via
+     aria-labelledby, and a screen reader already gets the same
+     completion state from the button's own aria-pressed / label when
+     it reaches it. Hidden by default; the script below un-hides it. */
+  .lesson-check {
+    color: #2E9E57;
+    margin-left: 0.5em;
+    font-size: 0.85em;
+  }
+
+  .lesson .block {
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+  }
+  .lesson .block h3 { margin: 0 0 0.5rem; }
+
+  /* ---- Buttons: one shared base + variants, so the same classes cover
+     an activity launch, a secondary action, or anything else on a page ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--orange); color: var(--orange-text-on); }
+  .btn-primary:hover { background: #E08415; }
+
+  .btn-secondary { background: transparent; color: var(--orange-text); border-color: var(--orange-text); }
+  .btn-secondary:hover { background: rgba(242,145,27,0.12); }
+
+  .btn-ghost { background: transparent; color: var(--body-text); border-color: rgba(255,255,255,0.35); }
+  .btn-ghost:hover { border-color: var(--white); }
+
+  .btn-link { background: transparent; color: var(--orange-text); border-color: transparent; padding: 0.25rem 0; }
+  .btn-link:hover { text-decoration: underline; }
+
+  .btn-small { padding: 0.4rem 0.85rem; font-size: 0.875rem; }
+
+  .btn-icon { font-size: 0.8em; }
+
+  /* ---- Activity block: instructions + supporting links + the button ---- */
+  .activity-links { margin: 0.75rem 0; padding-left: 1.25rem; }
+  .activity-links li { margin-bottom: 0.35rem; }
+  .activity-block .btn { margin-top: 0.25rem; }
+
+  /* ---- Video embed ---- */
+  .video-embed { margin: var(--space-3) 0; }
+  .video-frame {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 */
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .video-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .video-transcript { margin: 0.5rem 0 0; font-size: 0.9375rem; }
+  .video-transcript a { text-decoration: underline; }
+
+  /* ---- Image block ---- */
+  .image-block { margin: var(--space-3) 0; }
+  .image-block img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+  .image-caption {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: var(--space-3) 0 var(--space-4);
+  }
+  footer p {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  /* =====================================================================
+     COMPONENT LIBRARY — builder-only styles (delete with the section
+     below before publishing a real Unit page to learners)
+     ===================================================================== */
+  #component-library {
+    background: #14193E;
+    border-top: 4px solid var(--orange);
+    padding: var(--space-5) 0 var(--space-5);
+  }
+  #component-library .remove-note {
+    background: rgba(242,145,27,0.14);
+    border: 1px solid var(--orange);
+    border-radius: var(--radius);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-4);
+    color: var(--white);
+  }
+  #component-library .remove-note strong { color: var(--orange); }
+  #component-library h3 { color: var(--white); font-size: 1.0625rem; margin: var(--space-4) 0 0.5rem; }
+  #component-library .snippet-note { color: var(--muted); font-size: 0.9375rem; margin: 0 0 0.75rem; }
+  .btn-preview-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin: 0 0 1rem; }
+  .snippet { position: relative; }
+  .snippet pre {
+    background: #0F1330;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    padding-top: 2.75rem;
+    overflow-x: auto;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.8125rem;
+    color: var(--body-text);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: transparent;
+    color: var(--body-text);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .copy-btn[data-copied="true"] { border-color: #2E9E57; color: #2E9E57; }
+
+  /* "Finished — Close Window" button — hardcoded colors on purpose
+     (not the --tokens above), because this piece is meant to be pasted
+     onto other hosted pages that won't have this stylesheet. Border is
+     a lighter translucent white (not the fill color) plus a shadow, so
+     it reads as a box on a dark page or a light one. */
+  .btn-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1C2657;
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    font: 700 1rem Arial, Helvetica, sans-serif;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn-close:hover { background: #141B40; border-color: rgba(255,255,255,0.55); }
+  .btn-close:focus-visible { outline: 3px solid #F2911B; outline-offset: 3px; }
+  .close-fallback { font-style: italic; margin-top: 0.5rem; }
+  #lesson-finished { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+
+  /* ---------------------------------------------------------------
+     "Work Complete" section-tracking button — hardcoded colors on
+     purpose (see .btn-close above for why: it's meant to keep working
+     wherever it's pasted, even on a page without this stylesheet).
+
+     Two states, driven by the data-complete attribute the script at
+     the bottom of the page toggles on click:
+       data-complete="false" (default) — red X, label "Work Complete"
+       data-complete="true"            — green check, label "Completed"
+
+     Each button also saves its state to a browser cookie, scoped to
+     that button's own data-section-id attribute in the HTML — so
+     marking one section complete never marks any other section's
+     button complete too. See the script block for how to change the
+     identifier when you copy this button to a new section.
+     --------------------------------------------------------------- */
+  .btn-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1C2657;
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    font: 700 1rem Arial, Helvetica, sans-serif;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn-track:hover { background: #141B40; border-color: rgba(255,255,255,0.55); }
+  .btn-track:focus-visible { outline: 3px solid #F2911B; outline-offset: 3px; }
+  .btn-track .track-icon { font-size: 1.05em; color: #E5484D; } /* red X, default */
+  .btn-track[data-complete="true"] .track-icon { color: #2E9E57; } /* green check, once complete */
+  .track-progress { margin-top: var(--space-3); }
+
+  /* =====================================================================
+     LIGHT THEME — activated by data-theme="light" on <html> (set by the
+     theme-toggle button; see the script at the bottom of the page).
+
+     Everything above is written in tokens, so redefining the tokens here
+     re-themes the whole page automatically; no other rule needs to
+     change. Colors are pulled from the same design system used in the
+     Series 101 docx/xlsx deliverables (INK/INK2/GREY/LIGHT/LINE) so this
+     delivery layer stays visually consistent with the rest of the course
+     rather than inventing a separate light palette.
+
+     One exception: --orange (F2911B) is left as-is, since it's only
+     ever a solid fill and still works fine as one on a light page.
+     --orange-text gets its own darker value instead, because F2911B
+     drops to ~2:1 as TEXT on a light background, nowhere near the
+     4.5:1 AA minimum. #B45309 was checked against every background it
+     actually appears on (white panels, card fill, and the tag-scenario
+     wash below) and clears 4.5:1 on each.
+
+     Two components below (.btn-track, .btn-close) use hardcoded literal
+     colors rather than the tokens above, on purpose, so they keep
+     working if copied onto a page that doesn't share this stylesheet.
+     That means they don't re-theme automatically like everything else;
+     these overrides give them a light-mode look without touching their
+     portable defaults.
+     ===================================================================== */
+  :root[data-theme="light"] {
+    --navy-deep: #EEF1F8;
+    --navy:      #FFFFFF;
+    --orange-text: #B45309;
+    --tag-scenario-bg: #FDF2E2;
+    --white:     #1C2657;
+    --body-text: #1C2657;
+    --muted:     #6B7280;
+    --line:      rgba(28,38,87,0.14);
+    --focus:     #1C2657;
+  }
+
+  /* The solid-orange primary button needs a visible border in light
+     mode: F2911B against a light page only reaches ~2:1, short of the
+     3:1 WCAG non-text boundary minimum, so the button's own border
+     (transparent by default) carries the boundary instead. */
+  [data-theme="light"] .btn-primary { border-color: var(--body-text); }
+
+  [data-theme="light"] .btn-track,
+  [data-theme="light"] .btn-close {
+    background: #FFFFFF;
+    color: #1C2657;
+    border-color: rgba(28,38,87,0.55);
+    box-shadow: 0 1px 4px rgba(28,38,87,0.15);
+  }
+  [data-theme="light"] .btn-track:hover,
+  [data-theme="light"] .btn-close:hover {
+    background: #EEF1F8;
+    border-color: rgba(28,38,87,0.75);
+  }
+  [data-theme="light"] .btn-track:focus-visible,
+  [data-theme="light"] .btn-close:focus-visible {
+    outline-color: #1C2657;
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.5rem; }
+    .lesson-head { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="header-top">
+      <p class="eyebrow">Series 101 · AI Skills for IT Support</p>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to light color theme">
+        <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
+        <span class="theme-toggle-label">Light mode</span>
+      </button>
+    </div>
+    <p class="unit-meta">Lesson 1 of 5</p>
+    <h1>Lesson 1: Creating IT Documentation with AI</h1>
+    <p class="unit-tagline"><strong>Objectives:</strong></p>
+    <ul class="unit-objectives">
+      <li><u>Objective 1:</u> Write a specification for a support document, audience, task, required steps, and success state before prompting the AI. </li>
+      <li><u>Objective 2:</u> Generate a draft knowledge base article from that spec and identify the assumptions and unverified claims the AI flagged in its output. </li>
+      <li><u>Objective 3:</u> Verify the draft against the real system and knowledge base (V1–V5)* confirming menu labels, procedures, and facts, and removing any PII before publishing.  </li>
+      <li><u>Objective 4:</u> Test the article with a reader to separate "accurate" from "usable," logging where the reader hesitates, and decide whether to publish or hold.</li>
+    </ul>
+
+    <div class="block instruction-block">
+         <h3><span class="tag tag-instruction">Lesson Contents</h3>
+           <ul class="toc-list">
+        <li>Inroduction</li>
+        <li><span class="toc-row" data-tracks="lesson-1-1"><span class="toc-label">Lesson 1.1 - Worked example: a spec for a similar ticket</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><span class="toc-row" data-tracks="lesson-1-2"><span class="toc-label">Lesson 1.2 - Self-directed practice: write your own spec</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+        <li><span class="toc-row" data-tracks="lesson-1-3"><span class="toc-label">Lesson 1.3 - Self-check: find the missing field</span><span class="sr-only toc-status-text">Not complete</span></span></li>
+           </ul>
+     
+  </div>
+</header>
+
+<main id="main" class="wrap">
+   <!-- ================= LESSON Intro Video  ================= -->
+  <section class="lesson" id="lesson-0" aria-labelledby="lesson-0-heading">
+    <div class="lesson-head">
+           <h2 id="lesson-0-heading">Lesson Introduction</h2>
+    </div>
+      <br>
+    <div class="video-embed">
+      <div class="video-frame">
+        <iframe src="https://drusso-perscholas.github.io/uci_3121_ai_skills_for_it_support/demos/Vidtest.mp4" title="Placeholder: describe this video's content for screen-reader users" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+      </div>
+      <p class="video-transcript"><a href="TRANSCRIPT_URL_HERE">View transcript</a></p>
+    </div>
+
+      </section>
+  <!-- ================= END LESSON SECTION ================= -->
+
+  <!-- ================= UNIT-LEVEL SCENARIO / INSTRUCTIONAL TEXT ================= -->
+  <br>
+          
+  <div class="unit-intro">
+    <section class="block" id="unit-scenario" aria-labelledby="unit-scenario-heading">
+      <h2 id="unit-scenario-heading"><span class="tag tag-scenario">Scenario</span></h2>
+      <p class="placeholder">Your first morning on the Service Desk at Bellwood Group starts the same way every shift will: a ticket queue with your name on it. Your shift lead dropped one in before you logged in. A new hire’s laptop will not connect to CorpWiFi, the company’s wireless network, and someone needs to document how to fix it. You could ask ChatGPT to write the whole thing right now. It would probably sound right. That is exactly the problem this module solves</p>
+      <h3>Current Ticket You Are Working</h3>          
+           <div class="snippet">
+            <pre id="snippet-image"><code>&lt;figure class="image-block"&gt;
+  &lt;img src="IMAGE_URL_HERE" alt="Placeholder: describe what this image shows for screen-reader users" loading="lazy"&gt;
+  &lt;figcaption class="image-caption"&gt;Placeholder: optional one-line caption or credit.&lt;/figcaption&gt;  
+&lt;/figure&gt;</code></pre>
+    </div>
+    </section>
+
+      <section class="block activity-block" aria-labelledby="unit-activity-heading">
+      <h2 id="unit-activity-heading"><span class="tag tag-activity">What You Will Need</span></h2>
+      <p class="placeholder">Placeholder</p>
+      <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
+        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
+      </ul>
+      
+    </section>
+
+   
+  </div>
+
+    <!-- ================= END LESSON SECTION ================= -->
+
+  <!-- ================= LESSON SECTION — duplicate me (Lesson 1.1 shown as an example) ================= -->
+  <section class="lesson" id="lesson-1-1" aria-labelledby="lesson-1-1-heading">
+    <div class="lesson-head">
+      <span class="lesson-num">Lesson 1.1</span>
+      <h2 id="lesson-1-1-heading">Worked example: a spec for a similar ticket<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
+    </div>
+
+    <div class="block scenario-block">
+      <h3><span class="tag tag-scenario">Scenario</span></h3>
+      <p class="placeholder">It would take about thirty seconds to open ChatGPT and get something that reads like an answer. That is exactly the shortcut this lesson asks you to skip. Before you touch the AI at all, you write down, in plain terms, exactly what "done" looks like for this ticket, the same way a senior tech would before touching any request. Ten minutes spent here saves an afternoon of guessing later.. </p>
+    <h4>Your Notes:</h4>
+    <ul><li>Wi-Fi already shows "Connected" — that's not what's broken</li><li>A real page has to load, not just the connected icon</li><li>Email has to sync too, not just one browser tab</li><li>No lingering "no internet" warning stays on the taskbar</li><li>New hire can do it again tomorrow without calling back</li></ul>
+  <p>You also research closed tickets to see if there have been issues like this in the past> You locate a ticket Senior tech closed last week for the contractor’s tablet instead of a laptop.</p>
+        
+<h5>Previous Ticket Closed By Senior Tech</h5>
+        <div class="snippet">
+            <pre id="snippet-image"><code>&lt;figure class="image-block"&gt;
+  &lt;img src="IMAGE_URL_HERE" alt="Placeholder: describe what this image shows for screen-reader users" loading="lazy"&gt;
+  &lt;figcaption class="image-caption"&gt;Placeholder: optional one-line caption or credit.&lt;/figcaption&gt;  
+&lt;/figure&gt;</code></pre>
+    </div>
+   </div>
+
+    <div class="block instruction-block">
+         <h3><span class="tag tag-instruction">Instructions</h3>
+        <p class="placeholder"> A spec, short for specification, is just a short written description of what a finished piece of documentation has to do, written down before anyone starts drafting it.</p>
+    <p><b>What a spec does:</b></p>
+    <ul><li>Who will read it</li><li>The one thing it needs to help them do</li><li>The steps involved</li><li> How the reader will know it worked</li></ul>
+    <p>You write it first so you have something solid to measure the AI's draft against later, instead of judging a draft only by whether it sounds right.</p>
+    <p></p>
+        </div>
+
+    <div class="block activity-block">
+      <h3><span class="tag tag-activity">Activity</span></h3>
+      <p class="placeholder"> 
+        <b>The Anatomy of a Specification (Spec)</b>
+    <p>Use the two links below to:</p>
+    <ul><li>Check out what a correct spec looks like, filled in for the example closed ticket:</li>
+  <li>Then, explore all four fields. Click the orange "why this matters" buttons to learn why each one earns its place before anyone opens ChatGPT.</li> </ul>
+        <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder</li>
+        <li><a href="RESOURCE_URL_HERE">Placeholder</a></li>
+      </ul>
+           <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - View a Correct Spec Activity
+      </a>
+      <br>
+           <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Explore a Spec Activity
+      </a>
+          </div>
+  
+    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
+         id ("lesson-1-1"). Change it whenever you copy this button
+         into a different section. -->
+    <div class="track-progress">
+      <button type="button" class="btn-track" data-section-id="lesson-1-1" aria-pressed="false">
+        <span class="track-icon" aria-hidden="true">&#10007;</span>
+        <span class="track-label">Work Complete</span>
+      </button>
+    </div>
+  </section>
+    <section class="lesson" id="lesson-1-2" aria-labelledby="lesson-1-2-heading">
+    <div class="lesson-head">
+      <span class="lesson-num">Lesson 1.2</span>
+      <h2 id="lesson-1-2-heading">Self-directed practice: write your own spec<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
+    
+    </div>
+
+    <div class="block scenario-block">
+      <h3><span class="tag tag-scenario">Scenario</span></h3>
+      <p class="placeholder">You have reviewed the previous spec and ticket. You now prepare to write your own spec for issue with the new hire's laptop.</p>
+    </div>
+
+    <div class="block instruction-block">
+      <h3><span class="tag tag-instruction">Instructional Text</span></h3>
+      <p class="placeholder">You now write your own spec for the ticket you are working on. Your task to document: “How to connect a new laptop to the company Wi-Fi.” Open the spec template linked below and fill in every field:</p>
+        <ol><li><b>Audience -</b> Who reads this and what do they already know?</li><li><b>Task -</b>The one thing this article helps the reader do.</li><li><b>Required steps -</b>The steps you believe are involved, numbered.</li><li><b>Success state -</b>How the reader knows they are done.</li></ol>
+      <p><u>Do not open ChatGPT yet.</u> You are writing the yardstick first. </p>Save your finished spec - you will paste it into ChatGPT in Lesson 1.2, and you will check the AI’s draft against it in Lesson 1.3.</p>
+    </div>
+
+    <div class="block activity-block">
+      <h3><span class="tag tag-activity">Activity</span></h3>
+      <p class="placeholder">You are writing the yardstick first.</p>
+      <p>Use the tool below to write your first spec:</p>
+      <ul>Copy & Save your finished spec using Notepad, Word, or other tool.,</ul>
+      <ul>You will use it in future work.</ul>
+      <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder</a></li>
+            </ul>
+      <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.2 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Spec Builder Tool
+      </a>
+    </div>
+    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
+         id ("lesson-1-2"). Change it whenever you copy this button
+         into a different section. -->
+    <div class="track-progress">
+      <button type="button" class="btn-track" data-section-id="lesson-1-2" aria-pressed="false">
+        <span class="track-icon" aria-hidden="true">&#10007;</span>
+        <span class="track-label">Work Complete</span>
+      </button>
+    </div>
+  </section>
+    <section class="lesson" id="lesson-1-3" aria-labelledby="lesson-1-3-heading">
+    <div class="lesson-head">
+      <span class="lesson-num">Lesson 1.3</span>
+      <h2 id="lesson-1-3-heading">Self-Check: Find the Missing Field<span class="lesson-check" aria-hidden="true" hidden>&#10003;</span></h2>
+    </div>
+
+    <div class="block scenario-block">
+      <h3><span class="tag tag-scenario">Scenario</span></h3>
+      <p class="placeholder">You saved your spec and have it ready to use in a prompt.</p>
+      <p> Before you move on, you give your spec one final review.</p>
+    </div>
+
+    <div class="block instruction-block">
+      <h3><span class="tag tag-instruction">Instructions</span></h3>
+      <p class="placeholder">Look at two specs that are not yours. Each is missing exactly one field, and the gap
+      does not always jump out at you. That is deliberate: an incomplete spec is supposed to look finished.</p>
+      <p>The purpose here is not memorizing four field names. It is training your
+      eye to catch a spec that looks complete but is not, before that gap costs
+      you a vague draft two lessons from now. </p>
+      <p>As you read each example below,
+      ask yourself the question a senior tech asks without thinking about it:
+      if I handed this exact spec to ChatGPT right now, what would it be
+      forced to guess?</p>
+
+<p>In the activity, two example specs display, each missing exactly one field. Pick the
+missing field from a short list for each one. <p>On submit, see which you
+got right, and, per item, read the model answer plus one sentence on how
+that specific omission would have degraded the AI's draft:</p>
+<ul><li>A vague audience it could not write for</li>
+  <li>A task it had to infer</li>
+  <li>Steps it had to invent an order for</li>
+  <li>A success state it had no way to check against</li>
+    </div>
+
+    <div class="block activity-block">
+      <h3><span class="tag tag-activity">Activity</span></h3>
+      <p class="placeholder">Placeholder</p>
+      <ul class="activity-links">
+        <li><a href="ACTIVITY_URL_HERE">Placeholder link text</a></li>
+        <li><a href="RESOURCE_URL_HERE">Placeholder link text</a></li>
+      </ul>
+      <a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson 1.3 activity in a new tab">
+        <span class="btn-icon" aria-hidden="true">&#9654;</span> Launch - Self-Check Activity
+      </a>
+      
+    </div>
+
+
+    <!-- WORK-COMPLETE BUTTON — data-section-id is this section's own
+         id ("lesson-1-3"). Change it whenever you copy this button
+         into a different section. -->
+    <div class="track-progress">
+      <button type="button" class="btn-track" data-section-id="lesson-1-3" aria-pressed="false">
+        <span class="track-icon" aria-hidden="true">&#10007;</span>
+        <span class="track-label">Work Complete</span>
+      </button>
+    </div>
+  </section>
+  <section id="lesson-finished">
+    <button type="button" class="btn-close" onclick="closeActivityWindow()">
+      <span aria-hidden="true">&#10003;</span> Lesson Complete — Close Window
+    </button>
+    <p id="close-fallback" class="close-fallback" hidden>
+      You're all set — you can close this tab now.
+    </p>
+  </section>
+  <!-- ================= END LESSON SECTION ================= -->
+
+  <!-- To add Lesson 1.4, 1.5, etc., duplicate a lesson block above —
+       insert it BEFORE this Finished section so it stays last. -->
+
+</main>
+
+<br>
+<footer class="wrap">
+  <p>Series 101 · AI Skills for IT Support &mdash; Per Scholas &times; OpenAI Academy</p>
+</footer>
+
+<!-- =====================================================================
+     COMPONENT LIBRARY — reference only. Delete this whole <section>
+     before publishing a real Unit page; it is a builder tool, not
+     learner-facing content.
+     ===================================================================== -->
+<section id="component-library" aria-label="Component library for builders" hidden>
+  <div class="wrap">
+    <p class="eyebrow">Builder reference</p>
+    <h2>Reusable Components</h2>
+    <div class="remove-note">
+      <strong>Hidden from learners by default.</strong> This section carries the <code>hidden</code> attribute, so it won't render unless you add <code>?library=1</code> to this page's URL. It's here so you can copy the raw markup for each component while building a Unit page — see the instructions near the top of the file for details.
+    </div>
+
+    <h3>Activity block (instructions + links + launch button)</h3>
+    <p class="snippet-note">Drop this right after any Instructional Text block. Add as many &lt;li&gt; links as the activity needs, or delete the list entirely if there's nothing to link beyond the launch button.</p>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-activity" type="button">Copy code</button>
+      <pre id="snippet-activity"><code>&lt;div class="block activity-block"&gt;
+  &lt;h3&gt;&lt;span class="tag tag-activity"&gt;Activity&lt;/span&gt;&lt;/h3&gt;
+  &lt;p class="placeholder"&gt;Placeholder: one sentence telling the tech what to do in this activity.&lt;/p&gt;
+  &lt;ul class="activity-links"&gt;
+    &lt;li&gt;&lt;a href="ACTIVITY_URL_HERE"&gt;Placeholder link text&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="RESOURCE_URL_HERE"&gt;Placeholder link text&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch [Activity Name] in a new tab"&gt;
+    &lt;span class="btn-icon" aria-hidden="true"&gt;&amp;#9654;&lt;/span&gt; Launch Activity
+  &lt;/a&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <h3>Bare activity button (no instructions/links wrapper)</h3>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-button" type="button">Copy code</button>
+      <pre id="snippet-button"><code>&lt;a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch [Activity Name] in a new tab"&gt;
+  &lt;span class="btn-icon" aria-hidden="true"&gt;&amp;#9654;&lt;/span&gt; Launch Activity
+&lt;/a&gt;</code></pre>
+    </div>
+
+    <h3>Generic buttons</h3>
+    <p class="snippet-note">One shared <code>.btn</code> class plus a variant. Pick the one that matches how important the action is.</p>
+    <div class="btn-preview-row">
+      <button type="button" class="btn btn-primary">Primary</button>
+      <button type="button" class="btn btn-secondary">Secondary</button>
+      <button type="button" class="btn btn-ghost">Ghost</button>
+      <button type="button" class="btn btn-link">Link style</button>
+      <button type="button" class="btn btn-primary btn-small">Small</button>
+    </div>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-buttons" type="button">Copy code</button>
+      <pre id="snippet-buttons"><code>&lt;!-- Primary — the one main action on a screen (launch, submit, download) --&gt;
+&lt;a class="btn btn-primary" href="URL_HERE"&gt;Primary&lt;/a&gt;
+
+&lt;!-- Secondary — an alternative sitting next to a primary action --&gt;
+&lt;a class="btn btn-secondary" href="URL_HERE"&gt;Secondary&lt;/a&gt;
+
+&lt;!-- Ghost — a low-emphasis action (back, skip, cancel) --&gt;
+&lt;a class="btn btn-ghost" href="URL_HERE"&gt;Ghost&lt;/a&gt;
+
+&lt;!-- Link style — inline, text-weight action --&gt;
+&lt;a class="btn btn-link" href="URL_HERE"&gt;Link style&lt;/a&gt;
+
+&lt;!-- Add btn-small to any variant above for a compact size --&gt;
+&lt;a class="btn btn-primary btn-small" href="URL_HERE"&gt;Small&lt;/a&gt;</code></pre>
+    </div>
+
+    <h3>Video embed block</h3>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-video" type="button">Copy code</button>
+      <pre id="snippet-video"><code>&lt;div class="video-embed"&gt;
+  &lt;div class="video-frame"&gt;
+    &lt;iframe src="VIDEO_URL_HERE" title="[Describe this video's content]" loading="lazy" allow="fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
+  &lt;/div&gt;
+  &lt;p class="video-transcript"&gt;&lt;a href="TRANSCRIPT_URL_HERE"&gt;View transcript&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <h3>Image block</h3>
+    <p class="snippet-note">Drop this wherever a section needs a screenshot, diagram, or other image. <strong>Write real alt text</strong> describing what the image shows or conveys — screen-reader users rely on it, since they can't see the image itself. If the image is purely decorative and adds no information, use <code>alt=""</code> instead so screen readers skip it. Delete the <code>&lt;figcaption&gt;</code> line entirely if the image doesn't need a caption.</p>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-image" type="button">Copy code</button>
+      <pre id="snippet-image"><code>&lt;figure class="image-block"&gt;
+  &lt;img src="IMAGE_URL_HERE" alt="Placeholder: describe what this image shows for screen-reader users" loading="lazy"&gt;
+  &lt;figcaption class="image-caption"&gt;Placeholder: optional one-line caption or credit.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+    </div>
+
+    <h3>"Work Complete" section-tracking button + Lesson Contents entry</h3>
+    <p class="snippet-note">Two pieces that go in two different places, linked by one shared identifier. Drop the button at the end of any section a learner should be able to mark done; drop the matching contents-list item in the <code>&lt;ul&gt;</code> inside the header's Lesson Contents nav. <strong>Give both the same identifier</strong> — the button's <code>data-section-id</code> and the contents item's <code>data-tracks</code> — and that's the only edit needed on either one. Click the button below to see the label next to it react; that's exactly what happens with the real pair anywhere on the page.</p>
+    <div class="btn-preview-row">
+      <button type="button" class="btn-track" data-section-id="component-library-demo" aria-pressed="false">
+        <span class="track-icon" aria-hidden="true">&#10007;</span>
+        <span class="track-label">Work Complete</span>
+      </button>
+      <span class="toc-row" data-tracks="component-library-demo">
+        <span class="toc-label">Sample lesson title</span>
+        <span class="sr-only toc-status-text">Not complete</span>
+      </span>
+      <span class="toc-demo-hint">&larr; this label is wired to the button on the left</span>
+    </div>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-track" type="button">Copy code</button>
+      <pre id="snippet-track"><code>&lt;!-- 1) THE BUTTON — place at the end of the section. Change
+     data-section-id to something unique for this section (its
+     own id is a safe choice). --&gt;
+&lt;div class="track-progress"&gt;
+  &lt;button type="button" class="btn-track" data-section-id="CHANGE_ME" aria-pressed="false"&gt;
+    &lt;span class="track-icon" aria-hidden="true"&gt;&amp;#10007;&lt;/span&gt;
+    &lt;span class="track-label"&gt;Work Complete&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- 2) THE CONTENTS-LIST ITEM — place inside the &lt;ul&gt; in the
+     header's Lesson Contents nav. data-tracks must be the EXACT
+     SAME value as data-section-id above — that match is what
+     links this entry to that button. Point the href at the
+     section's own id so the link still jumps there too. On
+     completion the label turns italic with a green strikethrough;
+     keep the toc-row span wrapping the label and the sr-only text
+     together, since that's what the script toggles. --&gt;
+&lt;li&gt;
+  &lt;span class="toc-row" data-tracks="CHANGE_ME"&gt;
+    &lt;a href="#CHANGE_ME" class="toc-label"&gt;Section Title Here&lt;/a&gt;
+    &lt;span class="sr-only toc-status-text"&gt;Not complete&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/li&gt;</code></pre>
+    </div>
+
+    <h3>Empty lesson section (Scenario + Instructional Text + Activity + Video)</h3>
+    <p class="snippet-note">The heading already includes a <code>lesson-check</code> span, a green check hidden by default. If you also add a "Work Complete" tracking button to this section (see the snippet above), it un-hides that check automatically once the learner marks the section done, no extra wiring needed, since the script finds it by walking up to the section that contains the button. If you don't add a tracking button, the hidden span is harmless and can stay.</p>
+    <div class="snippet">
+      <button class="copy-btn" data-target="snippet-lesson" type="button">Copy code</button>
+      <pre id="snippet-lesson"><code>&lt;section class="lesson" id="lesson-X-Y" aria-labelledby="lesson-X-Y-heading"&gt;
+  &lt;div class="lesson-head"&gt;
+    &lt;span class="lesson-num"&gt;Lesson X.Y&lt;/span&gt;
+    &lt;h2 id="lesson-X-Y-heading"&gt;Lesson Title Here&lt;span class="lesson-check" aria-hidden="true" hidden&gt;&amp;#10003;&lt;/span&gt;&lt;/h2&gt;
+  &lt;/div&gt;
+
+  &lt;div class="block scenario-block"&gt;
+    &lt;h3&gt;&lt;span class="tag tag-scenario"&gt;Scenario&lt;/span&gt;&lt;/h3&gt;
+    &lt;p class="placeholder"&gt;Placeholder: one sentence setting up this lesson's situation.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;div class="block instruction-block"&gt;
+    &lt;h3&gt;&lt;span class="tag tag-instruction"&gt;Instructional Text&lt;/span&gt;&lt;/h3&gt;
+    &lt;p class="placeholder"&gt;Placeholder: one sentence on what the tech will learn or do here.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;div class="block activity-block"&gt;
+    &lt;h3&gt;&lt;span class="tag tag-activity"&gt;Activity&lt;/span&gt;&lt;/h3&gt;
+    &lt;p class="placeholder"&gt;Placeholder: one sentence telling the tech what to do in this activity.&lt;/p&gt;
+    &lt;ul class="activity-links"&gt;
+      &lt;li&gt;&lt;a href="ACTIVITY_URL_HERE"&gt;Placeholder link text&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="RESOURCE_URL_HERE"&gt;Placeholder link text&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;a class="btn btn-primary" href="ACTIVITY_URL_HERE" target="_blank" rel="noopener" aria-label="Launch the Lesson X.Y activity in a new tab"&gt;
+      &lt;span class="btn-icon" aria-hidden="true"&gt;&amp;#9654;&lt;/span&gt; Launch Activity
+    &lt;/a&gt;
+  &lt;/div&gt;
+
+  &lt;div class="video-embed"&gt;
+    &lt;div class="video-frame"&gt;
+      &lt;iframe src="VIDEO_URL_HERE" title="[Describe this video's content]" loading="lazy" allow="fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
+    &lt;/div&gt;
+    &lt;p class="video-transcript"&gt;&lt;a href="TRANSCRIPT_URL_HERE"&gt;View transcript&lt;/a&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+    </div>
+  </div>
+</section>
+
+<script>
+  /* ---- Component Library visibility ("builder mode") --------------
+     The Component Library <section> carries the `hidden` attribute in
+     the HTML, so learners never see it. Add ?library=1 to this page's
+     URL to reveal it while you're building — e.g.:
+       Series_101_Unit_2_Page_Daniel_Russo.html?library=1
+     Leave the flag off (the normal URL learners use) and the section
+     stays hidden. This only reads the URL; it never writes anything,
+     so there's nothing to remember to turn back off. ------------- */
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('library') === '1') {
+      var library = document.getElementById('component-library');
+      if (library) library.hidden = false;
+    }
+  })();
+
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = document.getElementById(btn.getAttribute('data-target'));
+      var text = target ? target.textContent : '';
+      navigator.clipboard.writeText(text).then(function () {
+        var original = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.setAttribute('data-copied', 'true');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.removeAttribute('data-copied');
+        }, 2000);
+      });
+    });
+  });
+
+  function closeActivityWindow() {
+    try {
+      window.close();
+    } catch (e) {
+      // Some embedding contexts (a sandboxed iframe, e.g. a Canvas LTI
+      // embed, is the likely one here) throw instead of silently
+      // refusing to close a tab/frame the script didn't open itself.
+      // Either way, fall through to the same fallback message below,
+      // without this catch, that throw would skip the setTimeout call
+      // entirely, so the button would neither close the window nor
+      // show the fallback text.
+    }
+    setTimeout(function () {
+      var msg = document.getElementById('close-fallback');
+      if (msg) msg.hidden = false;
+    }, 300);
+  }
+
+  /* -----------------------------------------------------------------
+     "Work Complete" section-tracking buttons, paired with entries
+     in the Lesson Contents list at the top of the page.
+
+     HOW TO ADD ONE TO A NEW SECTION (both halves — see the Component
+     Library for the exact markup to copy):
+       1. Copy a .btn-track button into the new section and give it a
+          unique data-section-id (the section's own id is the easiest
+          choice, e.g. data-section-id="lesson-1-4").
+       2. Copy a Lesson Contents <li> into the <ul> in the header and
+          give its .toc-row span the SAME value in data-tracks —
+          e.g. data-tracks="lesson-1-4". That match is what tells the
+          script which contents-list entry belongs to which button;
+          nothing else needs to change on either end.
+
+     WHY THE IDENTIFIER MATTERS:
+       Each button's completion state is saved as its own browser
+       cookie, named "work_complete_" + that button's data-section-id.
+       Two buttons that accidentally share the same data-section-id
+       would show/save the same completion state, so keep every
+       section's id unique across the page (and across pages, if this
+       template is duplicated for other units — cookies are shared per
+       website, not per page). If a button's data-section-id has no
+       matching data-tracks in the contents list, the button still
+       works fine on its own — it just has nothing to mark done.
+     ----------------------------------------------------------------- */
+
+  // Reads one cookie's value by name; returns null if it isn't set.
+  function getCookie(name) {
+    var match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  // Writes one cookie, defaulting to a 1-year expiry so progress
+  // persists across visits until the learner clears their browser data.
+  function setCookie(name, value, days) {
+    var expires = '';
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + value + expires + '; path=/; SameSite=Lax';
+  }
+
+  // Applies one button's visual state: red X + "Work Complete" when
+  // incomplete, green check + "Completed" when complete. Also sets
+  // aria-pressed so screen readers announce the toggle state.
+  function setTrackButtonState(btn, complete) {
+    var icon = btn.querySelector('.track-icon');
+    var label = btn.querySelector('.track-label');
+    btn.setAttribute('data-complete', complete ? 'true' : 'false');
+    btn.setAttribute('aria-pressed', complete ? 'true' : 'false');
+    if (icon) icon.textContent = complete ? '\u2713' : '\u2717'; // check : X
+    if (label) label.textContent = complete ? 'Completed' : 'Work Complete';
+  }
+
+  // Finds the Lesson Contents entry whose data-tracks matches this
+  // section's id and marks it complete (or clears it). If a section
+  // doesn't have a matching contents-list entry, this quietly does
+  // nothing — the button still works on its own.
+  function setTocStatus(sectionId, complete) {
+    var row = document.querySelector('.toc-row[data-tracks="' + sectionId + '"]');
+    if (!row) return;
+    row.classList.toggle('is-complete', complete);
+    var text = row.querySelector('.toc-status-text');
+    if (text) text.textContent = complete ? 'Completed' : 'Not complete';
+  }
+
+  // Shows (or hides) the green check next to a lesson's own heading.
+  // Takes the <section class="lesson"> itself rather than an id, so it
+  // works purely by DOM position, with no separate identifier to keep
+  // in sync, unlike the button/TOC pairing above. If a section has no
+  // .lesson-check span in its heading, this quietly does nothing.
+  function setLessonHeadingCheck(sectionEl, complete) {
+    if (!sectionEl) return;
+    var check = sectionEl.querySelector('.lesson-check');
+    if (check) check.hidden = !complete;
+  }
+
+  document.querySelectorAll('.btn-track').forEach(function (btn) {
+    // This is the link between a button and its Lesson Contents entry:
+    // the button's data-section-id and the contents-list entry's
+    // data-tracks attribute must be the SAME value. Whatever you set
+    // data-section-id to on a new button, give the matching contents
+    // list <li>'s data-tracks the identical value (see the Component
+    // Library for both snippets together).
+    var sectionId = btn.dataset.sectionId || 'section';
+    var cookieName = 'work_complete_' + sectionId;
+    // The button's own enclosing <section class="lesson">, if it's
+    // inside one (the Component Library demo button isn't, and that's
+    // fine, setLessonHeadingCheck no-ops on a missing section).
+    var sectionEl = btn.closest('.lesson');
+
+    // Updates the button, its contents-list entry, AND its heading
+    // check together, so none of the three can fall out of sync.
+    function applyState(complete) {
+      setTrackButtonState(btn, complete);
+      setTocStatus(sectionId, complete);
+      setLessonHeadingCheck(sectionEl, complete);
+    }
+
+    // On page load, restore whatever this section's cookie says —
+    // otherwise every visit would reset back to "Work Complete".
+    applyState(getCookie(cookieName) === 'true');
+
+    // Clicking toggles the state (so a learner can undo a mis-click)
+    // and saves the new state to this button's own cookie.
+    btn.addEventListener('click', function () {
+      var nowComplete = btn.getAttribute('data-complete') !== 'true';
+      applyState(nowComplete);
+      setCookie(cookieName, nowComplete, 365);
+    });
+  });
+
+  /* -----------------------------------------------------------------
+     Light/dark theme toggle. Everything on the page is themed through
+     the CSS custom properties on :root, redefined under
+     :root[data-theme="light"]. This script only ever needs to add or
+     remove that one data-theme attribute on <html>; it never touches
+     individual elements. The choice is saved to the same kind of
+     cookie the "Work Complete" buttons use (getCookie/setCookie
+     above), and since cookies are shared per site rather than per
+     page, the choice carries across every Unit/Lesson page a learner
+     visits, not just this one. The tiny inline script near the top of
+     <head> reads this same cookie before the page renders, so a
+     returning learner who chose light mode doesn't see a flash of
+     dark mode first.
+     ----------------------------------------------------------------- */
+  (function () {
+    var toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+
+    var icon = toggle.querySelector('.theme-toggle-icon');
+    var label = toggle.querySelector('.theme-toggle-label');
+
+    // Reflects the CURRENT theme in the button: icon/label/aria describe
+    // what clicking the button will switch TO, not the current state.
+    function reflect(isLight) {
+      toggle.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+      if (isLight) {
+        toggle.setAttribute('aria-label', 'Switch to dark color theme');
+        if (icon) icon.innerHTML = '&#9790;';
+        if (label) label.textContent = 'Dark mode';
+      } else {
+        toggle.setAttribute('aria-label', 'Switch to light color theme');
+        if (icon) icon.innerHTML = '&#9728;';
+        if (label) label.textContent = 'Light mode';
+      }
+    }
+
+    // The early <head> script may already have set data-theme="light"
+    // before this ran; just sync the button to whatever's on <html> now.
+    reflect(document.documentElement.getAttribute('data-theme') === 'light');
+
+    toggle.addEventListener('click', function () {
+      var goingLight = document.documentElement.getAttribute('data-theme') !== 'light';
+      if (goingLight) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      reflect(goingLight);
+      setCookie('series101_theme', goingLight ? 'light' : 'dark', 365);
+    });
+  })();
+</script>
+
+</body>
+</html>
