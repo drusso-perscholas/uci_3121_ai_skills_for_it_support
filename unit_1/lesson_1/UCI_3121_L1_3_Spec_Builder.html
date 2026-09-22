@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec Builder: connect a new laptop to CorpWiFi</title>
+<style>
+  :root{
+    --ink:#25306B; --ink2:#1C2657; --amber:#B45309; --amberbg:#FDF2E2;
+    --green:#15803D; --greenbg:#DCFCE7; --grey:#6B7280;
+    --card:#F4F6FB; --light:#EEF1F8; --line:#D7DDF0; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--light);}
+  body{
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--ink2);
+    line-height:1.55;
+    padding:22px 16px 44px;
+  }
+  .stage{max-width:880px; margin:0 auto;}
+  .window{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(37,48,107,0.08), 0 8px 24px rgba(37,48,107,0.08);
+  }
+  .chrome{
+    background:var(--ink); color:var(--white);
+    padding:12px 18px; display:flex; align-items:center; gap:12px;
+  }
+  .dots{display:flex; gap:6px; flex:0 0 auto;}
+  .dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.35);display:block;}
+  .chrome-title{
+    font-size:13px; font-weight:bold; letter-spacing:.02em; color:var(--white);
+    background:rgba(255,255,255,0.12); border-radius:6px; padding:6px 14px;
+    font-family:Consolas,"Courier New",monospace;
+  }
+  .content{padding:26px 26px 32px;}
+
+  .toprow{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:6px; flex-wrap:wrap;}
+  .eyebrow{color:var(--amber); font-weight:bold; font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:0;}
+  .chip{
+    display:inline-flex; align-items:center; font-size:11px; font-weight:bold; letter-spacing:.03em;
+    text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap;
+    background:var(--light); color:var(--grey); border:1px solid var(--line);
+  }
+  h1{color:var(--ink); font-size:20px; margin:6px 0 8px;}
+  .subhead{color:var(--ink2); font-size:14px; margin:0 0 20px; background:var(--card);
+    border:1px solid var(--line); border-left:4px solid var(--ink); border-radius:0 8px 8px 0;
+    padding:10px 14px;}
+  .subhead b{color:var(--ink);}
+
+  /* how-to strip */
+  .howto{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+    margin:0 0 24px;
+  }
+  .howto-step{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:12px 12px 12px 40px; position:relative; font-size:12.5px; color:var(--ink2);
+  }
+  .howto-step .num{
+    position:absolute; left:10px; top:11px; width:20px; height:20px; border-radius:50%;
+    background:var(--ink); color:#fff; font-size:11px; font-weight:bold;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .howto-step b{display:block; color:var(--ink); font-size:12.5px; margin-bottom:2px;}
+
+  /* fields */
+  .field{
+    background:var(--white); border:1px solid var(--line); border-radius:10px;
+    padding:16px 18px; margin-bottom:14px;
+  }
+  label.field-label{
+    display:block; color:var(--ink); font-size:12px; font-weight:bold;
+    letter-spacing:.05em; text-transform:uppercase; margin-bottom:4px;
+  }
+  .field-help{color:var(--grey); font-size:12.5px; margin:0 0 8px;}
+  textarea{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+    font-family:Arial,Helvetica,sans-serif; font-size:14px; color:var(--ink2);
+    resize:vertical; background:var(--white);
+  }
+  textarea:focus-visible{outline:3px solid var(--amber); outline-offset:1px; border-color:var(--amber);}
+  textarea::placeholder{color:#9BA3B7; font-style:italic;}
+
+  /* buttons */
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 8px;}
+  button.action{
+    font-family:Arial,Helvetica,sans-serif; font-size:13.5px; font-weight:bold;
+    padding:11px 18px; border-radius:8px; cursor:pointer; border:1.5px solid transparent;
+  }
+  button.action:focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
+  .btn-primary{background:var(--ink); color:#fff;}
+  .btn-primary:hover{background:#1C2657;}
+  .btn-amber{background:var(--amberbg); color:var(--amber); border-color:#F3D8AE;}
+  .btn-amber:hover{background:#FBE7C4;}
+  .btn-outline{background:var(--card); color:var(--ink); border-color:var(--ink);}
+  .btn-outline:hover{background:var(--light);}
+
+  /* output: assembled spec */
+  .out{display:none; margin-top:18px;}
+  .out.open{display:block;}
+  .spec{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px 22px;}
+  .spec h2{color:var(--ink); font-size:16px; margin:0 0 14px; padding-bottom:12px; border-bottom:2px solid var(--line);}
+  .spec-field{padding:10px 0; border-bottom:1px solid var(--line);}
+  .spec-field:last-child{border-bottom:none;}
+  .spec-field .lbl{color:var(--ink); font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:.05em; margin:0 0 4px;}
+  .spec-field .val{color:var(--ink2); font-size:14px; white-space:pre-wrap; margin:0;}
+  .spec-field .val.empty{color:#9BA3B7; font-style:italic;}
+  .spec-field ol{margin:4px 0 0 20px; padding:0;}
+  .spec-field ol li{margin-bottom:3px;}
+
+  /* output: evaluation */
+  .evalbox{background:var(--white); border:1px solid var(--line); border-radius:10px; padding:18px 20px;}
+  .eval-summary{font-size:14px; font-weight:bold; color:var(--ink); margin:0 0 14px; padding-bottom:12px; border-bottom:2px solid var(--line);}
+  .eval-row{display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); align-items:flex-start;}
+  .eval-row:last-child{border-bottom:none;}
+  .eval-tag{
+    flex:0 0 auto; font-size:10.5px; font-weight:bold; text-transform:uppercase; letter-spacing:.04em;
+    padding:4px 9px; border-radius:999px; margin-top:1px; white-space:nowrap;
+  }
+  .eval-good{background:var(--greenbg); color:var(--green);}
+  .eval-weak{background:var(--amberbg); color:var(--amber);}
+  .eval-empty{background:var(--light); color:var(--grey);}
+  .eval-text b{color:var(--ink); display:block; font-size:12.5px; margin-bottom:2px;}
+  .eval-text span{font-size:13.5px; color:var(--ink2);}
+
+  .copytext{
+    margin-top:12px; width:100%; min-height:120px; font-family:Consolas,"Courier New",monospace;
+    font-size:12.5px; color:var(--ink2); border:1px dashed var(--line); border-radius:8px;
+    padding:10px 12px; background:var(--white); display:none;
+  }
+  .copytext.show{display:block;}
+  .copy-status{font-size:12.5px; color:var(--green); font-weight:bold; margin-left:4px; display:none;}
+  .copy-status.show{display:inline;}
+  .copy-status.fail{color:var(--amber);}
+
+  .footnote{
+    margin-top:22px; font-size:12.5px; color:var(--grey); background:var(--card);
+    border:1px solid var(--line); border-radius:8px; padding:10px 14px;
+  }
+
+  .sr-only{position:absolute; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+  @media (max-width:680px){
+    .howto{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:480px){
+    .content{padding:20px 16px 26px;}
+    .howto{grid-template-columns:1fr;}
+    .btnrow{flex-direction:column;}
+    button.action{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="window">
+    <div class="chrome">
+      <span class="dots"><span></span><span></span><span></span></span>
+      <span class="chrome-title">Spec Builder &mdash; Bellwood Group IT Knowledge Tools</span>
+    </div>
+
+    <div class="content">
+      <div class="toprow">
+        <p class="eyebrow">Self-directed practice</p>
+        <span class="chip">Practice &middot; Not Scored</span>
+      </div>
+      <h1>Spec Builder: connect a new laptop to CorpWiFi</h1>
+      <p class="subhead">Task to document: <b>&ldquo;How to connect a new laptop to the company Wi-Fi.&rdquo;</b> Fill in each field below the way a senior tech would, before opening ChatGPT.</p>
+
+      <div class="howto" aria-label="How to use this tool">
+        <div class="howto-step"><span class="num">1</span><b>Fill in the fields</b>Write your own answer for all four parts of the spec below.</div>
+        <div class="howto-step"><span class="num">2</span><b>View your spec</b>See all four fields assembled into one finished document.</div>
+        <div class="howto-step"><span class="num">3</span><b>Evaluate it</b>Get a quick self-check on each field before moving on.</div>
+        <div class="howto-step"><span class="num">4</span><b>Copy it</b>Save your spec. You will need it for Lesson 2.</div>
+      </div>
+
+      <!-- Fields -->
+      <div class="field">
+        <label class="field-label" for="f-audience">Audience</label>
+        <p class="field-help">Who reads this, and what do they already know?</p>
+        <textarea id="f-audience" rows="2" placeholder="Who reads this, and what do they already know?"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="f-task">Task</label>
+        <p class="field-help">The one thing this article helps the reader do.</p>
+        <textarea id="f-task" rows="2" placeholder="The one thing this article helps the reader do."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="f-steps">Required steps</label>
+        <p class="field-help">The steps you believe are involved. Put one step per line.</p>
+        <textarea id="f-steps" rows="5" placeholder="1. &#10;2. &#10;3. &#10;4. "></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="f-success">Success state</label>
+        <p class="field-help">How will the reader know they are done?</p>
+        <textarea id="f-success" rows="2" placeholder="How will the reader know they are done?"></textarea>
+      </div>
+
+      <div class="btnrow">
+        <button type="button" class="action btn-primary" id="btn-view">View completed spec</button>
+        <button type="button" class="action btn-amber" id="btn-eval">Evaluate my spec</button>
+        <button type="button" class="action btn-outline" id="btn-copy">Copy my spec</button>
+        <span class="copy-status" id="copy-status"></span>
+      </div>
+
+      <!-- Assembled spec output -->
+      <div class="out" id="out-view">
+        <div class="spec">
+          <h2>Spec: connect a new laptop to CorpWiFi</h2>
+          <div class="spec-field">
+            <p class="lbl">Audience</p>
+            <p class="val" id="view-audience"></p>
+          </div>
+          <div class="spec-field">
+            <p class="lbl">Task</p>
+            <p class="val" id="view-task"></p>
+          </div>
+          <div class="spec-field">
+            <p class="lbl">Required steps</p>
+            <div class="val" id="view-steps"></div>
+          </div>
+          <div class="spec-field">
+            <p class="lbl">Success state</p>
+            <p class="val" id="view-success"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evaluation output -->
+      <div class="out" id="out-eval">
+        <div class="evalbox">
+          <p class="eval-summary" id="eval-summary"></p>
+          <div id="eval-rows"></div>
+        </div>
+      </div>
+
+      <textarea class="copytext" id="copytext-fallback" readonly aria-label="Your spec as plain text, select all and copy manually if the copy button did not work"></textarea>
+
+      <div class="footnote">Do not open ChatGPT yet. Copy and save this spec once you are happy with it. You will use it in future activities. </div>
+
+      <div id="live-region" class="sr-only" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ids = ['audience','task','steps','success'];
+  function val(id){ return document.getElementById('f-' + id).value.trim(); }
+  function announce(msg){ document.getElementById('live-region').textContent = msg; }
+
+  function stepsToLines(text){
+    return text.split('\n').map(function(l){ return l.replace(/^\s*\d+[\.\)]\s*/, '').trim(); })
+               .filter(function(l){ return l.length > 0; });
+  }
+
+  function compileSpecText(){
+    var lines = stepsToLines(val('steps'));
+    var stepsBlock = lines.length
+      ? lines.map(function(l,i){ return (i+1) + '. ' + l; }).join('\n')
+      : '(not yet written)';
+    return 'SPEC: connect a new laptop to CorpWiFi\n\n' +
+      'AUDIENCE\n' + (val('audience') || '(not yet written)') + '\n\n' +
+      'TASK\n' + (val('task') || '(not yet written)') + '\n\n' +
+      'REQUIRED STEPS\n' + stepsBlock + '\n\n' +
+      'SUCCESS STATE\n' + (val('success') || '(not yet written)');
+  }
+
+  // --- View completed spec ---
+  document.getElementById('btn-view').addEventListener('click', function(){
+    document.getElementById('view-audience').textContent = val('audience') || 'Not yet written.';
+    document.getElementById('view-audience').classList.toggle('empty', !val('audience'));
+    document.getElementById('view-task').textContent = val('task') || 'Not yet written.';
+    document.getElementById('view-task').classList.toggle('empty', !val('task'));
+    document.getElementById('view-success').textContent = val('success') || 'Not yet written.';
+    document.getElementById('view-success').classList.toggle('empty', !val('success'));
+
+    var lines = stepsToLines(val('steps'));
+    var stepsEl = document.getElementById('view-steps');
+    if(lines.length){
+      var ol = document.createElement('ol');
+      lines.forEach(function(l){ var li = document.createElement('li'); li.textContent = l; ol.appendChild(li); });
+      stepsEl.innerHTML = '';
+      stepsEl.appendChild(ol);
+    } else {
+      stepsEl.innerHTML = '<p class="val empty">Not yet written.</p>';
+    }
+
+    document.getElementById('out-view').classList.add('open');
+    document.getElementById('out-view').scrollIntoView({behavior:'smooth', block:'nearest'});
+    announce('Spec assembled below.');
+  });
+
+  // --- Evaluate my spec ---
+  var VAGUE_AUDIENCE = /^(everyone|anyone|all users|users|people|staff|the user|customers)\.?$/i;
+  var VAGUE_SUCCESS = ['it works','done','fixed','resolved','working','complete','finished','it is done','all set'];
+
+  function evalAudience(){
+    var t = val('audience');
+    if(!t) return {level:'empty', msg:'This field is blank. Name who will read the finished article.'};
+    var words = t.split(/\s+/).length;
+    if(words <= 1 || VAGUE_AUDIENCE.test(t)){
+      return {level:'weak', msg:'"' + t + '" does not tell the AI much. Try naming a specific role, and what that role likely already knows.'};
+    }
+    return {level:'good', msg:'Reads like a specific audience. That tells the AI how much background it can skip.'};
+  }
+
+  function evalTask(){
+    var t = val('task');
+    if(!t) return {level:'empty', msg:'This field is blank. Name the one thing this article helps the reader do.'};
+    var words = t.split(/\s+/).length;
+    var andCount = (t.match(/\band\b/gi) || []).length;
+    if(words < 3){
+      return {level:'weak', msg:'That is pretty short for a task description. Say what the reader will be able to do, in a full phrase.'};
+    }
+    if(andCount >= 2){
+      return {level:'weak', msg:'This may be describing more than one task. A spec works best when it points at exactly one outcome.'};
+    }
+    return {level:'good', msg:'Reads like one clear, checkable task.'};
+  }
+
+  function evalSteps(){
+    var lines = stepsToLines(val('steps'));
+    if(lines.length === 0) return {level:'empty', msg:'This field is blank. List the steps you believe are involved, one per line.'};
+    if(lines.length === 1) return {level:'weak', msg:'Only one step is listed. Most real tasks break into more than one discrete action. Try numbering each one separately.'};
+    var shortOnes = lines.filter(function(l){ return l.split(/\s+/).length < 3; });
+    if(shortOnes.length > 0){
+      return {level:'weak', msg:'Some steps are very short (like a single word). Each step should describe one specific, doable action.'};
+    }
+    return {level:'good', msg:'Multiple concrete steps listed. That gives you something to check the AI\u2019s draft against, step by step.'};
+  }
+
+  function evalSuccess(){
+    var t = val('success');
+    if(!t) return {level:'empty', msg:'This field is blank. Describe how the reader will know they are done.'};
+    var lower = t.toLowerCase();
+    var isVague = t.length < 25 && VAGUE_SUCCESS.some(function(p){ return lower.indexOf(p) !== -1; });
+    if(isVague){
+      return {level:'weak', msg:'"' + t + '" is not something you could point at on a screen. Describe what the reader would actually see or be able to do.'};
+    }
+    if(t.split(/\s+/).length < 4){
+      return {level:'weak', msg:'Try adding a bit more detail. A success state works best when someone else could check it without asking you.'};
+    }
+    return {level:'good', msg:'This sounds like something you could visibly check, which is exactly what keeps the AI\u2019s draft from running long or stopping short.'};
+  }
+
+  var LEVEL_LABEL = {good:'Looks solid', weak:'Worth revisiting', empty:'Not started'};
+
+  document.getElementById('btn-eval').addEventListener('click', function(){
+    var results = [
+      {label:'Audience', r:evalAudience()},
+      {label:'Task', r:evalTask()},
+      {label:'Required steps', r:evalSteps()},
+      {label:'Success state', r:evalSuccess()}
+    ];
+    var goodCount = results.filter(function(x){ return x.r.level === 'good'; }).length;
+
+    var summaryEl = document.getElementById('eval-summary');
+    if(goodCount === 4){
+      summaryEl.textContent = 'All four fields hold up. You are ready to save this and move on.';
+    } else {
+      summaryEl.textContent = goodCount + ' of 4 fields look solid. Revisit the flagged field(s) below before moving on.';
+    }
+
+    var rowsEl = document.getElementById('eval-rows');
+    rowsEl.innerHTML = '';
+    results.forEach(function(item){
+      var row = document.createElement('div');
+      row.className = 'eval-row';
+      var tag = document.createElement('span');
+      tag.className = 'eval-tag eval-' + item.r.level;
+      tag.textContent = LEVEL_LABEL[item.r.level];
+      var textWrap = document.createElement('div');
+      textWrap.className = 'eval-text';
+      var b = document.createElement('b');
+      b.textContent = item.label;
+      var span = document.createElement('span');
+      span.textContent = item.r.msg;
+      textWrap.appendChild(b);
+      textWrap.appendChild(span);
+      row.appendChild(tag);
+      row.appendChild(textWrap);
+      rowsEl.appendChild(row);
+    });
+
+    document.getElementById('out-eval').classList.add('open');
+    document.getElementById('out-eval').scrollIntoView({behavior:'smooth', block:'nearest'});
+    announce('Evaluation complete. ' + summaryEl.textContent);
+  });
+
+  // --- Copy my spec ---
+  document.getElementById('btn-copy').addEventListener('click', function(){
+    var allEmpty = !val('audience') && !val('task') && !val('steps') && !val('success');
+    var statusEl = document.getElementById('copy-status');
+    var fallback = document.getElementById('copytext-fallback');
+
+    if(allEmpty){
+      statusEl.textContent = 'Nothing to copy yet, fill in the fields first.';
+      statusEl.classList.add('fail');
+      statusEl.classList.add('show');
+      announce('Nothing to copy yet. Fill in the fields first.');
+      setTimeout(function(){ statusEl.classList.remove('show'); }, 3500);
+      return;
+    }
+
+    var text = compileSpecText();
+
+    function showFallback(){
+      fallback.value = text;
+      fallback.classList.add('show');
+      statusEl.textContent = 'Copy blocked here. Select the text below and copy it manually.';
+      statusEl.classList.add('fail');
+      statusEl.classList.add('show');
+      announce('Copy blocked. Your spec is shown below to select and copy manually.');
+    }
+
+    function showSuccess(){
+      statusEl.textContent = 'Copied to clipboard.';
+      statusEl.classList.remove('fail');
+      statusEl.classList.add('show');
+      fallback.classList.remove('show');
+      announce('Spec copied to clipboard.');
+      setTimeout(function(){ statusEl.classList.remove('show'); }, 3500);
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(showSuccess).catch(function(){
+        try{
+          fallback.value = text;
+          fallback.style.display = 'block';
+          fallback.select();
+          var ok = document.execCommand('copy');
+          if(ok){ showSuccess(); } else { showFallback(); }
+        }catch(e){ showFallback(); }
+      });
+    } else {
+      try{
+        fallback.value = text;
+        fallback.style.display = 'block';
+        fallback.select();
+        var ok2 = document.execCommand('copy');
+        if(ok2){ showSuccess(); } else { showFallback(); }
+      }catch(e){ showFallback(); }
+    }
+  });
+})();
+</script>
+</body>
+</html>

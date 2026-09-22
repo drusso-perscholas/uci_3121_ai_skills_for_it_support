@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Specification Template - Interactive Editor (Scene 2)</title>
+<style>
+  /* ============================================================
+     Per Scholas · Series 101 · Module 1 · Scene 2
+     Specification Template Editor
+     Design system: navy #25306B / #1C2657, Arial + Consolas.
+     Component tint colors are ADA-tuned for a dark editor bg
+     (#1B2350); every one also carries a text label chip + legend
+     row, so color is never the sole differentiator.
+     ============================================================ */
+
+  :root {
+    --ink:        #25306B;   /* primary navy */
+    --ink2:       #1C2657;   /* deep navy */
+    --editor-bg:  #1B2350;   /* editor canvas */
+    --gutter-bg:  #161C42;   /* line-number gutter */
+    --editor-fg:  #E5EAF7;   /* body text on editor (14.8:1 on editor-bg) */
+    --grey:       #4B5563;   /* muted text on white, 7.5:1 */
+    --line:       #D7DDF0;
+    --card:       #F4F6FB;
+    --light:      #EEF1F8;
+    --white:      #FFFFFF;
+    --page-bg:    #EEF1F8;
+
+    /* Component tints, each verified >= 4.5:1 on --editor-bg (#1B2350):
+       AUDIENCE  #93C5FD ~ 7.9:1
+       SCOPE     #6EE7B7 ~ 10.4:1
+       STEPS     #FCD34D ~ 11.6:1
+       DONE      #F9A8D4 ~ 8.5:1
+       FAILURE   #FDBA74 ~ 9.6:1 */
+    --c-audience: #93C5FD;
+    --c-scope:    #6EE7B7;
+    --c-steps:    #FCD34D;
+    --c-done:     #F9A8D4;
+    --c-failure:  #FDBA74;
+
+    --font-body: Arial, Helvetica, sans-serif;
+    --font-mono: Consolas, "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: var(--font-body);
+    color: var(--ink2);
+  }
+
+  .wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* ---- Header ---- */
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #9A4A07;              /* darker amber, 4.9:1 on page bg (EEF1F8) */
+    margin: 0 0 6px;
+  }
+  h1 {
+    font-size: 26px;
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .sub {
+    font-size: 15px;
+    color: var(--grey);
+    margin: 0 0 20px;
+    max-width: 62ch;
+  }
+
+  /* ---- Editor window ---- */
+  .editor {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(28,38,87,0.22);
+    border: 1px solid var(--ink2);
+  }
+  .titlebar {
+    background: var(--ink2);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+  }
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #E06C6C; }
+  .dot.y { background: #E3C05A; }
+  .dot.g { background: #5FB878; }
+  .filename {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #AEB9E8;
+  }
+  .status-live {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #AEB9E8;
+    min-height: 16px;
+  }
+  .status-live b { color: var(--white); }
+
+  .canvas {
+    display: flex;
+    background: var(--editor-bg);
+    min-height: 430px;
+  }
+  .gutter {
+    background: var(--gutter-bg);
+    color: #8A96CF;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    text-align: right;
+    padding: 16px 10px 16px 14px;
+    user-select: none;
+    white-space: pre;
+  }
+  .code {
+    position: relative;
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--editor-fg);
+    padding: 16px 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    tab-size: 2;
+  }
+
+  /* Component coloring inside the code area */
+  .code .h-audience { color: var(--c-audience); font-weight: 700; }
+  .code .h-scope    { color: var(--c-scope);    font-weight: 700; }
+  .code .h-steps    { color: var(--c-steps);    font-weight: 700; }
+  .code .h-done     { color: var(--c-done);     font-weight: 700; }
+  .code .h-failure  { color: var(--c-failure);  font-weight: 700; }
+  .code .b-audience { color: var(--c-audience); }
+  .code .b-scope    { color: var(--c-scope); }
+  .code .b-steps    { color: var(--c-steps); }
+  .code .b-done     { color: var(--c-done); }
+  .code .b-failure  { color: var(--c-failure); }
+  .code .dim        { color: #8A96CF; }   /* parenthetical hints, 4.6:1 on editor-bg */
+
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    background: var(--white);
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+  .caret.hidden { display: none; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Margin label chip that fades in when a component finishes */
+  .chip {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 1px 7px;
+    border-radius: 5px;
+    color: var(--editor-bg);
+    margin-left: 10px;
+    vertical-align: middle;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .chip.show { opacity: 1; transform: translateX(0); }
+  .chip.audience { background: var(--c-audience); }
+  .chip.scope    { background: var(--c-scope); }
+  .chip.steps    { background: var(--c-steps); }
+  .chip.done     { background: var(--c-done); }
+  .chip.failure  { background: var(--c-failure); }
+
+  /* ---- Controls ---- */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 4px;
+  }
+  button.ctrl {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  button.ctrl:hover { background: #303C82; }
+  button.ctrl.secondary {
+    color: var(--ink);
+    background: var(--white);
+    border-color: var(--line);
+  }
+  button.ctrl.secondary:hover { background: var(--light); }
+  button.ctrl:disabled { opacity: .45; cursor: not-allowed; }
+
+  .speed {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--ink2);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    background: var(--white);
+    color: var(--ink);
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+
+  /* Visible keyboard focus everywhere */
+  button:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid #B45309;
+    outline-offset: 2px;
+  }
+
+  /* ---- Legend ---- */
+  .legend {
+    margin-top: 22px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .legend h2 {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ink);
+    margin: 0 0 12px;
+  }
+  .legend-row {
+    padding: 10px 10px;
+    border-radius: 8px;
+    transition: background .2s ease;
+  }
+  .legend-row + .legend-row { border-top: 1px solid var(--light); }
+  .legend-row.active { background: var(--card); }
+  .legend-chip {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--ink2);
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .legend-chip::after {
+    content: "\25B8";
+    font-size: 9px;
+  }
+  .legend-chip[aria-expanded="true"]::after {
+    content: "\25BE";
+  }
+  .legend-chip.audience { background: var(--c-audience); }
+  .legend-chip.scope    { background: var(--c-scope); }
+  .legend-chip.steps    { background: var(--c-steps); }
+  .legend-chip.done     { background: var(--c-done); }
+  .legend-chip.failure  { background: var(--c-failure); }
+  .legend-instruction {
+    font-size: 13px;
+    color: var(--grey);
+    margin: -6px 0 12px;
+  }
+  .legend-why { font-size: 14px; color: var(--ink2); line-height: 1.4; display: none; margin-top: 8px; padding-left: 2px; }
+  .legend-why.open { display: block; }
+  .legend-why b { color: var(--ink); }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .canvas { min-height: 360px; }
+    .gutter { display: none; }
+    .speed { margin-left: 0; width: 100%; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Specification Template</h1>
+  <p class="sub">Before any AI is involved, the writer drafts the spec by hand. Each
+    component is color-coded and labelled so you can see the five parts a good spec
+    always has, and why the one people skip matters most.</p>
+
+  <div class="editor" role="group" aria-label="Specification template editor">
+    <div class="titlebar">
+      <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+      <span class="filename">doc-spec.md - Editor</span>
+      <span class="status-live" aria-hidden="true" id="statusChip"></span>
+    </div>
+    <div class="canvas">
+      <div class="gutter" id="gutter" aria-hidden="true">1</div>
+      <div class="code" id="code" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Live announcements for screen readers -->
+  <div class="sr-only" role="status" aria-live="polite" id="live"></div>
+
+  <div class="controls">
+    <button class="ctrl" id="playBtn" aria-label="Play the typing animation">▶ Play</button>
+    <button class="ctrl secondary" id="pauseBtn" aria-label="Pause the typing animation" disabled>❚❚ Pause</button>
+    <button class="ctrl secondary" id="skipBtn" aria-label="Skip to the completed specification">⏭ Skip to end</button>
+    <button class="ctrl secondary" id="restartBtn" aria-label="Restart the animation from the beginning">↺ Restart</button>
+    <button class="ctrl secondary" id="copyBtn" aria-label="Copy the completed specification to your clipboard" disabled>⧉ Copy spec</button>
+    <button class="ctrl secondary" id="closeBtn" aria-label="Finish the activity and close this window">✕ Finished - Close window</button>
+    <span class="speed">
+      Speed
+      <span class="seg" role="group" aria-label="Typing speed">
+        <button data-speed="2"   aria-pressed="false" aria-label="Half speed">0.5×</button>
+        <button data-speed="1"   aria-pressed="true"  aria-label="Normal speed">1×</button>
+        <button data-speed="0.5" aria-pressed="false" aria-label="Double speed">2×</button>
+      </span>
+    </span>
+  </div>
+
+  <div class="legend" aria-label="What each spec component is for">
+    <h2>WHAT EACH COMPONENT IS FOR</h2>
+    <p class="legend-instruction">Click a component below to see why it matters.</p>
+    <div class="legend-row" data-key="audience">
+      <button type="button" class="legend-chip audience" aria-expanded="false" aria-controls="why-audience">AUDIENCE</button>
+      <div class="legend-why" id="why-audience"><b>Who reads this.</b> Role and experience decide how much you explain and what you can assume.</div>
+    </div>
+    <div class="legend-row" data-key="scope">
+      <button type="button" class="legend-chip scope" aria-expanded="false" aria-controls="why-scope">SCOPE</button>
+      <div class="legend-why" id="why-scope"><b>What it covers, and what it doesn't.</b> Naming the boundary stops the AI from over-writing.</div>
+    </div>
+    <div class="legend-row" data-key="steps">
+      <button type="button" class="legend-chip steps" aria-expanded="false" aria-controls="why-steps">STEPS</button>
+      <div class="legend-why" id="why-steps"><b>One action per line, exact labels.</b> This is the yardstick you'll verify the draft against later.</div>
+    </div>
+    <div class="legend-row" data-key="done">
+      <button type="button" class="legend-chip done" aria-expanded="false" aria-controls="why-done">DONE LOOKS LIKE</button>
+      <div class="legend-why" id="why-done"><b>The success state the reader can confirm.</b> Without it, a reader can't tell if it worked.</div>
+    </div>
+    <div class="legend-row" data-key="failure">
+      <button type="button" class="legend-chip failure" aria-expanded="false" aria-controls="why-failure">FAILURE / EDGE CASES</button>
+      <div class="legend-why" id="why-failure"><b>The blank people skip, so fill it first.</b> What to do when input is wrong, the system is unreachable, or it's already done.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- The spec content, as an ordered list of segments. ----
+  // Each segment: {cls, text}. A cls of "" is plain; "nl" is a newline.
+  // Component headings/bodies get their color class. "done" marks the end
+  // of a component (fires the label chip + legend highlight).
+  const KEY_LABEL = {
+    audience: "AUDIENCE",
+    scope: "SCOPE",
+    steps: "STEPS",
+    done: "DONE LOOKS LIKE",
+    failure: "FAILURE / EDGE CASES"
+  };
+
+  // Build the document as lines. Each line has a component key (or null),
+  // a css class prefix, and the raw text.
+  const LINES = [
+    { key: "audience", cls: "h-audience", text: "AUDIENCE:" },
+    { key: "audience", cls: "b-audience", text: "  Tier 1 tech, first week, has a company tablet in hand and no Wi-Fi yet." },
+    { key: null, cls: "", text: "" },
+    { key: "scope", cls: "h-scope", text: "SCOPE:" },
+    { key: "scope", cls: "b-scope", text: "  Connect the tablet to CorpWiFi. Start to success." },
+    { key: "scope", cls: "dim", text: "  NOT covered: device provisioning, account setup, hardware repair." },
+    { key: null, cls: "", text: "" },
+    { key: "steps", cls: "h-steps", text: "STEPS (one action per line, exact labels):" },
+    { key: "steps", cls: "b-steps", text: "  1. Open Wi-Fi settings on the tablet." },
+    { key: "steps", cls: "b-steps", text: "  2. Select CorpWiFi from the list of available networks." },
+    { key: "steps", cls: "b-steps", text: "  3. Enter the network password when prompted." },
+    { key: "steps", cls: "b-steps", text: "  4. Confirm the tablet shows \"Connected\" and can reach the internet." },
+    { key: null, cls: "", text: "" },
+    { key: "done", cls: "h-done", text: "DONE LOOKS LIKE:" },
+    { key: "done", cls: "b-done", text: "  The tablet connects and the user can reach the internet." },
+    { key: null, cls: "", text: "" },
+    { key: "failure", cls: "h-failure", text: "FAILURE / EDGE CASES:" },
+    { key: "failure", cls: "b-failure", text: "  Wrong password -> error message, no retry loop." },
+    { key: "failure", cls: "b-failure", text: "  CorpWiFi not listed -> say so, don't guess a network name." },
+    { key: "failure", cls: "b-failure", text: "  Already connected -> confirm it, do nothing further." }
+  ];
+
+  // Component order for detecting "just finished a component".
+  const COMP_ORDER = ["audience", "scope", "steps", "done", "failure"];
+
+  const codeEl   = document.getElementById("code");
+  const gutterEl = document.getElementById("gutter");
+  const liveEl   = document.getElementById("live");
+  const statusEl = document.getElementById("statusChip");
+
+  const playBtn    = document.getElementById("playBtn");
+  const pauseBtn   = document.getElementById("pauseBtn");
+  const skipBtn    = document.getElementById("skipBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const copyBtn    = document.getElementById("copyBtn");
+  const closeBtn   = document.getElementById("closeBtn");
+  const speedBtns  = Array.from(document.querySelectorAll(".seg button"));
+  const legendRows = Array.from(document.querySelectorAll(".legend-row"));
+  const legendChips = Array.from(document.querySelectorAll(".legend-chip"));
+
+  const BASE_MS = 34;          // per-character base delay at 1x
+  let speedMul = 1;            // 0.5 = 2x fast, 2 = half speed
+  let li = 0, ci = 0;          // line index, char index
+  let timer = null;
+  let running = false;
+  let announcedComp = null;    // which component we've announced as "writing"
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Rebuild the rendered code area from scratch up to (li, ci).
+  function render(showCaret) {
+    let html = "";
+    let gutter = "";
+    for (let l = 0; l <= li && l < LINES.length; l++) {
+      const line = LINES[l];
+      const full = line.text;
+      const shown = (l < li) ? full : full.slice(0, ci);
+      const cls = line.cls ? (" class=\"" + line.cls + "\"") : "";
+      // Escape HTML
+      const safe = shown.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      let lineHtml = cls ? ("<span" + cls + ">" + safe + "</span>") : safe;
+
+      // If this is the last visible line and caret is on, append caret
+      if (l === li && showCaret) lineHtml += "<span class=\"caret\" id=\"caret\"></span>";
+
+      // If a component's LAST line just completed, add its chip
+      lineHtml += chipFor(l);
+
+      html += lineHtml + "\n";
+      gutter += (l + 1) + "\n";
+    }
+    codeEl.innerHTML = html;
+    gutterEl.textContent = gutter.replace(/\n$/, "");
+  }
+
+  // Returns a chip span if line l is the final line of its component AND
+  // that line is fully typed.
+  function chipFor(l) {
+    const line = LINES[l];
+    if (!line.key) return "";
+    const isLastOfComp = (l === LINES.length - 1) || (LINES[l + 1].key !== line.key);
+    if (!isLastOfComp) return "";
+    const fullyTyped = (l < li) || (l === li && ci >= line.text.length);
+    if (!fullyTyped) return "";
+    return "<span class=\"chip " + line.key + " show\">" + KEY_LABEL[line.key] + "</span>";
+  }
+
+  function announceComponent(key) {
+    if (key && key !== announcedComp) {
+      announcedComp = key;
+      liveEl.textContent = "Now writing: " + KEY_LABEL[key];
+      statusEl.innerHTML = "Now writing: <b>" + KEY_LABEL[key] + "</b>";
+      legendRows.forEach(function (r) {
+        r.classList.toggle("active", r.getAttribute("data-key") === key);
+      });
+    }
+  }
+
+  function step() {
+    if (li >= LINES.length) { finish(); return; }
+    const line = LINES[li];
+
+    // Announce component when we start its first character
+    if (line.key && ci === 0) announceComponent(line.key);
+
+    if (ci < line.text.length) {
+      ci++;
+    } else {
+      li++;
+      ci = 0;
+    }
+    render(true);
+    autoscroll();
+
+    if (li >= LINES.length) { finish(); return; }
+
+    // Pause a touch longer at end of a line for readability
+    const atLineEnd = (ci === 0 && li > 0);
+    const delay = BASE_MS * speedMul * (atLineEnd ? 6 : 1);
+    timer = setTimeout(step, delay);
+  }
+
+  function autoscroll() {
+    const caret = document.getElementById("caret");
+    if (caret && caret.scrollIntoView) {
+      caret.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function play() {
+    if (running) return;
+    if (li >= LINES.length) restart(true);   // replay if finished
+    running = true;
+    setControls();
+    liveEl.textContent = "Typing started.";
+    step();
+  }
+
+  function pause() {
+    running = false;
+    clearTimeout(timer);
+    setControls();
+    render(true);   // keep caret visible while paused
+    liveEl.textContent = "Paused.";
+  }
+
+  function finish() {
+    running = false;
+    clearTimeout(timer);
+    li = LINES.length; ci = 0;
+    render(false);  // hide caret at the end
+    // Ensure every legend row settles to inactive highlight state
+    legendRows.forEach(function (r) { r.classList.remove("active"); });
+    statusEl.innerHTML = "Specification complete.";
+    liveEl.textContent = "Specification complete. All five components written: audience, scope, steps, done looks like, and failure or edge cases.";
+    setControls();
+  }
+
+  function skipToEnd() {
+    clearTimeout(timer);
+    running = false;
+    // Reveal all component chips + walk legend once
+    li = LINES.length; ci = 0;
+    render(false);
+    statusEl.innerHTML = "Specification complete.";
+    liveEl.textContent = "Skipped to the completed specification.";
+    legendRows.forEach(function (r) { r.classList.remove("active"); });
+    setControls();
+  }
+
+  function restart(silent) {
+    clearTimeout(timer);
+    running = false;
+    li = 0; ci = 0; announcedComp = null;
+    legendRows.forEach(function (r) { r.classList.remove("active"); });
+    statusEl.textContent = "";
+    render(true);
+    setControls();
+    if (!silent) liveEl.textContent = "Restarted. Press play to type the specification.";
+  }
+
+  function setControls() {
+    const done = li >= LINES.length;
+    playBtn.disabled   = running;
+    pauseBtn.disabled  = !running;
+    skipBtn.disabled   = done;
+    copyBtn.disabled   = !done;
+    playBtn.textContent = done ? "▶ Replay" : "▶ Play";
+  }
+
+  // ---- Speed control ----
+  speedBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      speedBtns.forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+      speedMul = parseFloat(b.getAttribute("data-speed"));
+      liveEl.textContent = "Speed set to " + b.textContent.trim() + ".";
+    });
+  });
+
+  playBtn.addEventListener("click", play);
+  pauseBtn.addEventListener("click", pause);
+  skipBtn.addEventListener("click", skipToEnd);
+  restartBtn.addEventListener("click", function () { restart(false); });
+
+  // ---- Legend: click a component to reveal why it matters ----
+  legendChips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      const key = chip.closest(".legend-row").getAttribute("data-key");
+      const panel = document.getElementById("why-" + key);
+      const wasOpen = chip.getAttribute("aria-expanded") === "true";
+      chip.setAttribute("aria-expanded", String(!wasOpen));
+      panel.classList.toggle("open", !wasOpen);
+      liveEl.textContent = !wasOpen
+        ? KEY_LABEL[key] + ". " + panel.textContent.trim()
+        : KEY_LABEL[key] + " explanation collapsed.";
+    });
+  });
+
+  // ---- Copy the completed spec to the clipboard ----
+  function specAsPlainText() {
+    return LINES.map(function (line) { return line.text; }).join("\n");
+  }
+
+  function fallbackCopy(text) {
+    var ok = false;
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) {
+      ok = false;
+    }
+    return ok;
+  }
+
+  function announceCopyResult(ok) {
+    var original = "\u29c9 Copy spec";
+    if (ok) {
+      copyBtn.textContent = "\u2713 Copied";
+      liveEl.textContent = "Specification copied to your clipboard.";
+    } else {
+      liveEl.textContent = "Could not copy automatically. Select the spec text in the editor and copy it manually.";
+    }
+    setTimeout(function () { copyBtn.textContent = original; }, 2200);
+  }
+
+  function copySpec() {
+    if (copyBtn.disabled) return;
+    var text = specAsPlainText();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { announceCopyResult(true); },
+        function () { announceCopyResult(fallbackCopy(text)); }
+      );
+    } else {
+      announceCopyResult(fallbackCopy(text));
+    }
+  }
+
+  copyBtn.addEventListener("click", copySpec);
+
+  // ---- Close the activity window ----
+  function closeWindow() {
+    liveEl.textContent = "Closing this window.";
+    window.close();
+    // Some browsers block a script from closing a tab it didn't open itself
+    // (e.g. one the learner opened by clicking a link). If we're still here
+    // a moment later, close() was blocked - tell the learner visibly so
+    // they know it's safe to close the tab by hand.
+    setTimeout(function () {
+      statusEl.innerHTML = "Activity complete - you can close this tab now.";
+      liveEl.textContent = "Activity complete. You can close this browser tab now.";
+    }, 400);
+  }
+
+  closeBtn.addEventListener("click", closeWindow);
+
+  // ---- Initial state ----
+  if (prefersReduced) {
+    // Respect reduced motion: render the finished spec immediately.
+    skipToEnd();
+    statusEl.innerHTML = "Specification complete.";
+    liveEl.textContent = "Reduced motion is on, so the completed specification is shown without animation. Use Restart then Play to watch it type.";
+  } else {
+    render(true);
+    statusEl.innerHTML = "Ready - press Play.";
+  }
+})();
+</script>
+</body>
+</html>

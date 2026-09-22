@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec: connect a contractor's tablet to CorpWiFi</title>
+<style>
+  :root {
+    --ink: #25306B;
+    --ink2: #1C2657;
+    --orange: #C9740B;      /* non-text accents only: this ratio is below 4.5:1 as text */
+    --orange-text: #B45309; /* darker amber for any TEXT or border-as-text use: 4.5:1+ on white/light */
+    --green: #2E9E57;
+    --grey: #6B7280;
+    --card: #F4F6FB;
+    --light: #EEF1F8;
+    --line: #D7DDF0;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--white);
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--ink2);
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 22px 36px;
+  }
+  .chip {
+    display: inline-block;
+    background: var(--light);
+    color: var(--ink2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 13px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    margin-bottom: 16px;
+  }
+  .eyebrow {
+    color: var(--orange-text);
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  h1 {
+    color: var(--ink);
+    font-size: 21px;
+    line-height: 1.3;
+    margin: 0 0 6px;
+  }
+  .subhead {
+    color: var(--grey);
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 0 0 18px;
+    max-width: 56ch;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .field {
+    border-bottom: 1px solid var(--line);
+    padding: 16px 18px;
+    background: var(--white);
+  }
+  .field:last-child { border-bottom: none; }
+  .field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .field-label {
+    font-weight: bold;
+    color: var(--ink);
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px;
+  }
+  .field-value {
+    font-size: 15px;
+    color: var(--ink2);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .field-value ol {
+    margin: 4px 0 0 20px;
+    padding: 0;
+  }
+  .field-value li { margin-bottom: 4px; }
+  .why-toggle {
+    flex: none;
+    background: var(--light);
+    color: var(--orange-text);
+    border: 1.5px solid var(--orange-text);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .why-toggle:hover {
+    background: #FBE7CE;
+  }
+  .why-toggle:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .why-toggle[aria-expanded="true"] {
+    background: var(--orange-text);
+    color: var(--white);
+    border-color: var(--orange-text);
+  }
+  .why-panel {
+    margin-top: 10px;
+    padding: 10px 13px;
+    background: var(--card);
+    border-left: 4px solid var(--orange);
+    border-radius: 4px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink2);
+    display: none;
+  }
+  .why-panel.open { display: block; }
+  .why-panel .why-tag {
+    display: block;
+    font-weight: bold;
+    color: var(--orange-text);
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .close-btn {
+    background: var(--white);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .close-btn:hover { background: var(--light); }
+  .close-btn:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  @media (max-width: 480px) {
+    .field-row { flex-direction: column; }
+    .why-toggle { align-self: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="chip">Practice - not scored</div>
+
+  <p class="eyebrow">Worked example - not your ticket</p>
+  <h1>Spec: connect a contractor's tablet to CorpWiFi</h1>
+  <p class="subhead">A senior tech closed a similar CorpWiFi ticket last week, for a contractor's tablet instead of a laptop. Here is the spec they wrote before prompting.</p>
+
+  <div class="card" role="group" aria-label="Worked-example documentation specification">
+
+    <div class="field">
+      <div class="field-row">
+        <div>
+          <p class="field-label">Audience</p>
+          <p class="field-value">Tier 1 tech</p>
+        </div>
+        <button class="why-toggle" type="button" aria-expanded="false" aria-controls="why-audience">
+          Why this matters
+        </button>
+      </div>
+      <div class="why-panel" id="why-audience">
+        <span class="why-tag">Why this matters</span>
+        Without an audience, the AI does not know how much to explain, so it either assumes expert knowledge or over-explains basics a tech already knows.
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <div>
+          <p class="field-label">Task</p>
+          <p class="field-value">Document how to connect a company-issued tablet to CorpWiFi.</p>
+        </div>
+        <button class="why-toggle" type="button" aria-expanded="false" aria-controls="why-task">
+          Why this matters
+        </button>
+      </div>
+      <div class="why-panel" id="why-task">
+        <span class="why-tag">Why this matters</span>
+        A vague task lets the AI guess what "done" means. Naming the exact action keeps the draft from wandering into related but unwanted territory.
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <div>
+          <p class="field-label">Required steps</p>
+          <div class="field-value">
+            <ol>
+              <li>Open Wi-Fi settings on the tablet.</li>
+              <li>Select CorpWiFi from the list of available networks.</li>
+              <li>Enter the network password when prompted.</li>
+              <li>Confirm the tablet shows "Connected" and can load a webpage.</li>
+            </ol>
+          </div>
+        </div>
+        <button class="why-toggle" type="button" aria-expanded="false" aria-controls="why-steps">
+          Why this matters
+        </button>
+      </div>
+      <div class="why-panel" id="why-steps">
+        <span class="why-tag">Why this matters</span>
+        Writing the steps you believe are involved forces you to think through the sequence before the AI invents its own order, so you have something concrete to check step by step against the real system later.
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <div>
+          <p class="field-label">Success state</p>
+          <p class="field-value">The tablet connects and the user can reach the internet.</p>
+        </div>
+        <button class="why-toggle" type="button" aria-expanded="false" aria-controls="why-success">
+          Why this matters
+        </button>
+      </div>
+      <div class="why-panel" id="why-success">
+        <span class="why-tag">Why this matters</span>
+        Without this, the AI does not know when the article is done, so it pads or stops early.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="actions">
+    <button class="close-btn" type="button" id="closeBtn" aria-label="Finish the activity and close this window">✕ Finished - Close window</button>
+  </div>
+
+  <div id="live-region" class="sr-only" aria-live="polite"></div>
+
+<script>
+  (function () {
+    var toggles = document.querySelectorAll('.why-toggle');
+    var live = document.getElementById('live-region');
+    var closeBtn = document.getElementById('closeBtn');
+
+    toggles.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var panelId = btn.getAttribute('aria-controls');
+        var panel = document.getElementById(panelId);
+        var wasExpanded = btn.getAttribute('aria-expanded') === 'true';
+        var nowExpanded = !wasExpanded;
+
+        btn.setAttribute('aria-expanded', String(nowExpanded));
+        panel.classList.toggle('open', nowExpanded);
+
+        var fieldLabel = btn.closest('.field').querySelector('.field-label').textContent;
+        live.textContent = nowExpanded
+          ? 'Why this matters for ' + fieldLabel + ', expanded.'
+          : 'Why this matters for ' + fieldLabel + ', collapsed.';
+      });
+    });
+
+    closeBtn.addEventListener('click', function () {
+      live.textContent = 'Closing this window.';
+      window.close();
+      // Some browsers block a script from closing a tab it did not open
+      // itself. If we are still here a moment later, close() was blocked -
+      // update the button's own label so the learner can see it is safe
+      // to close the tab by hand.
+      setTimeout(function () {
+        closeBtn.textContent = 'Activity complete - you can close this tab now';
+        live.textContent = 'Activity complete. You can close this browser tab now.';
+      }, 400);
+    });
+  })();
+</script>
+
+</body>
+</html>
