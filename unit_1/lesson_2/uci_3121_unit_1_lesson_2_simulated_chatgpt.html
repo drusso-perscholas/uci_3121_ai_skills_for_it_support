@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulated ChatGPT Session · Generate the Draft</title>
+<style>
+  :root{
+    --ink:#25306B; --ink2:#1C2657; --orange:#C9740B; --orangebg:#F2911B;
+    --green:#2E9E57; --grey:#6B7280; --card:#F4F6FB; --light:#EEF1F8;
+    --line:#D7DDF0; --warm:#FDF2E2; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:Arial,Helvetica,sans-serif; color:var(--ink2);
+    background:#fff; line-height:1.5; padding:20px 14px 40px;
+  }
+  .wrap{max-width:700px; margin:0 auto;}
+
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+
+  .eyebrow{color:var(--orange); font-weight:bold; font-size:13px;
+    letter-spacing:.06em; text-transform:uppercase; margin:0 0 4px;}
+  h1{color:var(--ink); font-size:21px; margin:0 0 4px; font-weight:bold;}
+  .lede{color:var(--grey); font-size:13px; margin:0 0 18px;}
+
+  .instructions{margin:0 0 18px; font-size:13px; color:var(--ink2);}
+  .instructions p{margin:0 0 6px; font-weight:bold; color:var(--ink);
+    font-size:13px;}
+  .instructions ul{margin:0; padding-left:20px;}
+  .instructions li{margin-bottom:4px;}
+
+  /* Chat window chrome */
+  .window{border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    background:#fff;}
+  .titlebar{background:var(--ink); color:var(--white); padding:13px 18px;
+    display:flex; align-items:center; gap:11px;}
+  .avatar{width:30px; height:30px; border-radius:50%; background:var(--orangebg);
+    color:var(--ink); font-family:Arial; font-weight:bold; font-size:12px;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .titlebar .who{line-height:1.3;}
+  .titlebar .who .name{font-weight:bold; font-size:15px;}
+  .titlebar .who .via{font-size:12px; color:#C7CCE8;}
+  .simtag{margin-left:auto; font-size:11px; font-weight:bold; letter-spacing:.04em;
+    text-transform:uppercase; background:rgba(255,255,255,.14); color:var(--white);
+    padding:4px 9px; border-radius:20px; white-space:nowrap;}
+
+  .thread{padding:20px 18px 22px; background:var(--light);}
+
+  /* User bubble = the pasted prompt */
+  .row-user{display:flex; justify-content:flex-end; margin-bottom:16px;}
+  .bubble-user{
+    max-width:92%; background:var(--white); border:1px solid var(--line);
+    border-radius:12px 12px 2px 12px; padding:14px 16px;
+  }
+  .bubble-user .lbl{font-size:11px; font-weight:bold; color:var(--grey);
+    text-transform:uppercase; letter-spacing:.05em; margin:0 0 8px;}
+  .bubble-user pre{
+    font-family:Consolas,"Courier New",monospace; font-size:12.5px;
+    color:var(--ink2); white-space:pre-wrap; margin:0; line-height:1.6;
+  }
+  .bubble-user .field-hd{color:var(--ink); font-weight:bold;}
+
+  .runbar{display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
+    gap:10px; margin:4px 0 10px;}
+  button.copyprompt{
+    font-family:Arial; font-size:13px; font-weight:bold; color:var(--ink);
+    background:var(--white); border:1.5px solid var(--ink); border-radius:22px;
+    padding:9px 16px; cursor:pointer;
+  }
+  button.copyprompt:hover{background:var(--card);}
+  button.copyprompt:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+  .promptActionNote{margin:0 0 12px; font-size:12px; color:var(--green);
+    text-align:center;}
+  button.run{
+    font-family:Arial; font-size:14px; font-weight:bold; color:var(--white);
+    background:var(--ink); border:none; border-radius:22px; padding:10px 22px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  }
+  button.run:hover{background:var(--ink2);}
+  button.run:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+  button.run .tri{font-size:11px;}
+  button.run[aria-disabled="true"]{opacity:.55; cursor:default; pointer-events:none;}
+
+  /* Assistant response */
+  .row-assist{display:flex; gap:11px; align-items:flex-start;}
+  .avatar-sm{width:26px; height:26px; border-radius:50%; background:var(--ink);
+    color:var(--white); font-size:11px; font-weight:bold; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .response{flex:1; min-width:0; background:var(--white); border:1px solid var(--line);
+    border-radius:12px 12px 12px 2px; padding:16px 18px;}
+
+  .placeholder{color:var(--grey); font-size:13px; font-style:italic; padding-top:4px;}
+
+  /* Response label row + skip control */
+  .resprow{display:flex; align-items:baseline; justify-content:space-between;
+    gap:10px; margin:0 0 8px;}
+  .resp-lbl{font-size:11px; font-weight:bold; color:var(--grey);
+    text-transform:uppercase; letter-spacing:.05em; margin:0;}
+  .skiptext{all:unset; cursor:pointer; font-family:Arial; font-size:12px;
+    color:var(--grey); text-decoration:underline;}
+  .skiptext:hover{color:var(--ink2);}
+  .skiptext:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;
+    border-radius:3px;}
+
+  .stage{opacity:0; transform:translateY(6px);
+    transition:opacity .5s ease, transform .5s ease; margin-bottom:14px;}
+  .stage.visible{opacity:1; transform:translateY(0);}
+
+  .lead{font-size:14px; color:var(--ink2); margin:0 0 10px;}
+
+  .article ol{margin:0; padding-left:20px; font-size:14px; color:var(--ink2);}
+  .article li{margin-bottom:7px;}
+
+  .panel{border-radius:8px; padding:16px 18px 16px 22px;}
+  .panel.warm{background:var(--warm);}
+  .panel.neutral{background:var(--card); border:1px solid var(--line);}
+  .panel h2{font-size:15px; margin:0 0 9px; letter-spacing:.02em; min-height:1.1em;}
+  .panel.warm h2{color:var(--orange);}
+  .panel.neutral h2{color:var(--ink);}
+  .panel ul{list-style:none; margin:0; padding:0;}
+  .panel li{font-size:13.5px; color:var(--ink2); margin-bottom:9px;}
+  .panel.neutral li{padding-left:1.4em; text-indent:-1.4em;}
+  .panel.neutral li:before{content:"\2610  "; color:var(--ink); font-size:13px;}
+
+  /* Streaming cursor */
+  .cursor{display:inline-block; width:2px; height:1em; background:var(--ink2);
+    margin-left:1px; vertical-align:-2px; animation:blink 1s step-start infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* Click-to-highlight: article steps <-> their assumptions.
+     The fill lives on the <li> (a block box) rather than the inline
+     button, so it covers every wrapped line of a long assumption, not
+     just the first. */
+  .linkbtn{all:unset; cursor:pointer; font:inherit; color:inherit;}
+  .linkbtn:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;
+    border-radius:3px;}
+  .linkbtn:disabled{pointer-events:none; cursor:default;}
+
+  li[data-link]{border-radius:5px;
+    transition:background-color .15s ease, box-shadow .15s ease;}
+  .article li[data-link].linked-highlight{background:rgba(201,116,11,.16);
+    box-shadow:0 0 0 6px rgba(201,116,11,.16);}
+  .panel li[data-link].linked-highlight{background:rgba(201,116,11,.22);
+    box-shadow:0 0 0 6px rgba(201,116,11,.22);}
+
+  .linkhint{font-size:12px; color:var(--grey); font-style:italic; margin:0 0 14px;}
+
+  /* Response action row */
+  .msgActions{display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+    margin-top:2px; padding-top:12px; border-top:1px solid var(--line);}
+  button.actbtn{font-family:Arial; font-size:12px; color:var(--grey);
+    background:none; border:1px solid transparent; border-radius:14px;
+    padding:5px 12px; cursor:pointer;}
+  button.actbtn:hover{background:var(--card); color:var(--ink2);}
+  button.actbtn:focus-visible{outline:3px solid var(--orangebg); outline-offset:1px;}
+  button.actbtn[aria-pressed="true"]{background:var(--card); color:var(--ink);
+    border-color:var(--line); font-weight:bold;}
+  .copiedNote{font-size:12px; color:var(--green); margin-right:4px;}
+
+  .caption{margin-top:14px; font-size:12px; color:var(--grey); font-style:italic;
+    text-align:center;}
+
+  /* Finished / close-window control */
+  .donebar{margin-top:26px; padding-top:20px; border-top:1px solid var(--line);
+    text-align:center;}
+  button.finish{
+    font-family:Arial; font-size:14px; font-weight:bold; color:var(--white);
+    background:#15803D; border:none; border-radius:22px; padding:10px 24px;
+    cursor:pointer;
+  }
+  button.finish:hover{background:#0F5C2C;}
+  button.finish:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+  button.finish[disabled]{opacity:.7; cursor:default;}
+  .donenote{margin:12px 0 0; font-size:13px; color:var(--grey);}
+
+  @media (prefers-reduced-motion: reduce){
+    .stage{transition:none;}
+    .cursor{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Activity 2.1</p>
+  <h1>Watch the Generation Prompt Run</h1>
+  <p class="lede">Simulated ChatGPT session, built for this lesson. Nothing on this page is a live AI response, and nothing you see here is sent anywhere.</p>
+  <div class="instructions">
+    <p>Instructions:</p>
+    <ul><li>Run the prompt</li><li>Review assumptions made in the generated article by hovering over each assumption in the ASSUMPTIONS I Made section</li><li>Copy and save the example prompt to try for yourself</li></ul>
+  </div>
+
+  <div class="window">
+    <div class="titlebar">
+      <div class="avatar">AI</div>
+      <div class="who">
+        <div class="name">ChatGPT</div>
+        <div class="via">via OpenAI Academy</div>
+      </div>
+      <div class="simtag">Simulated</div>
+    </div>
+
+    <div class="thread">
+
+      <div class="row-user">
+        <div class="bubble-user">
+          <p class="lbl">The prompt, pasted from the template</p>
+          <pre>You are a senior IT support technician writing a knowledge base
+article for Tier 1 staff. Write the article from the
+SPECIFICATION below.
+
+<span class="field-hd">SPECIFICATION:</span>
+Audience: Tier 1 support tech with no prior context on this ticket.
+Task: Document how to connect a contractor's tablet to CorpWiFi.
+Required steps:
+1. Open Wi-Fi settings on the tablet.
+2. Select CorpWiFi from the list of available networks.
+3. Enter the network passphrase.
+4. Confirm the tablet shows as connected and can reach the internet.
+Success state: The tablet connects and the user can reach the internet.
+
+<span class="field-hd">OUTPUT FORMAT:</span>
+1. The article in clear numbered steps.
+2. Then a section titled ASSUMPTIONS I MADE listing every menu
+   label, path, version, or fact you assumed but did not verify.
+3. Then a section titled WHAT TO CHECK listing anything a reader
+   could get wrong.</pre>
+        </div>
+      </div>
+
+      <div class="runbar">
+        <button type="button" class="run" id="runBtn" aria-disabled="false">
+          <span class="tri">&#9654;</span>
+          <span id="runLabel">Run the prompt</span>
+        </button>
+        <button type="button" class="copyprompt" id="copyPromptBtn"
+          aria-label="Copy &mdash; copies the example prompt to your clipboard">Copy</button>
+        <button type="button" class="copyprompt" id="copyPromptTxtBtn"
+          aria-label="Copy as TXT &mdash; saves the example prompt as a text file">Copy as TXT</button>
+      </div>
+      <p class="promptActionNote" id="promptActionNote" aria-live="polite" hidden></p>
+
+      <div class="row-assist">
+        <div class="avatar-sm">AI</div>
+        <div class="response" id="response">
+          <p class="placeholder" id="placeholder">Response will appear here once you run the prompt.</p>
+
+          <div class="resprow">
+            <p class="resp-lbl" id="respLabel" hidden>ChatGPT&rsquo;s response</p>
+            <button type="button" class="skiptext" id="skipBtn" hidden>Skip ahead</button>
+          </div>
+
+          <div class="stage article" id="stageArticle">
+            <p class="lead" id="leadLine"></p>
+            <ol>
+              <li data-link="step1"><button type="button" class="linkbtn" id="s1" data-link="step1" aria-pressed="false" disabled></button></li>
+              <li data-link="step2"><button type="button" class="linkbtn" id="s2" data-link="step2" aria-pressed="false" disabled></button></li>
+              <li data-link="step3"><button type="button" class="linkbtn" id="s3" data-link="step3" aria-pressed="false" disabled></button></li>
+              <li data-link="step4"><button type="button" class="linkbtn" id="s4" data-link="step4" aria-pressed="false" disabled></button></li>
+            </ol>
+          </div>
+
+          <div class="stage" id="stageAssumptions">
+            <div class="panel warm">
+              <h2 id="assumeHead"></h2>
+              <ul>
+                <li data-link="step2"><button type="button" class="linkbtn" id="a1" data-link="step2" aria-pressed="false" disabled></button></li>
+                <li data-link="step3"><button type="button" class="linkbtn" id="a2" data-link="step3" aria-pressed="false" disabled></button></li>
+                <li data-link="step1"><button type="button" class="linkbtn" id="a3" data-link="step1" aria-pressed="false" disabled></button></li>
+                <li data-link="step4"><button type="button" class="linkbtn" id="a4" data-link="step4" aria-pressed="false" disabled></button></li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="linkhint" id="linkHint" hidden>Tip: hover a step above, or an assumption below, to see how they connect &mdash; click one to keep it highlighted.</p>
+
+          <div class="stage" id="stageCheck">
+            <div class="panel neutral">
+              <h2 id="checkHead"></h2>
+              <ul>
+                <li id="c1"></li>
+                <li id="c2"></li>
+                <li id="c3"></li>
+                <li id="c4"></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="msgActions" id="msgActions" hidden>
+            <button type="button" class="actbtn" id="copyBtn">Copy</button>
+            <span class="copiedNote" id="copiedNote" hidden>Copied</span>
+            <button type="button" class="actbtn" id="upBtn" aria-pressed="false">Helpful</button>
+            <button type="button" class="actbtn" id="downBtn" aria-pressed="false">Not helpful</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="caption">Same input, but this time the format asks the model to hand back its guesses along with the draft.</p>
+
+  <div class="donebar">
+    <button type="button" class="finish" id="finishBtn">Finished &mdash; Close Window</button>
+    <p class="donenote" id="doneNote" aria-live="polite" hidden>You're all set &mdash; you can close this tab now and return to the course.</p>
+  </div>
+
+  <div class="sr-only" id="liveRegion" aria-live="polite" aria-atomic="true"></div>
+
+</div>
+
+<script>
+(function(){
+  // ---- Element references ----
+  var btn = document.getElementById('runBtn');
+  var label = document.getElementById('runLabel');
+  var placeholder = document.getElementById('placeholder');
+  var respLabel = document.getElementById('respLabel');
+  var skipBtn = document.getElementById('skipBtn');
+  var linkHint = document.getElementById('linkHint');
+  var msgActions = document.getElementById('msgActions');
+  var copiedNote = document.getElementById('copiedNote');
+  var copyBtn = document.getElementById('copyBtn');
+  var upBtn = document.getElementById('upBtn');
+  var downBtn = document.getElementById('downBtn');
+  var liveRegion = document.getElementById('liveRegion');
+
+  var stages = {
+    article: document.getElementById('stageArticle'),
+    assumptions: document.getElementById('stageAssumptions'),
+    check: document.getElementById('stageCheck')
+  };
+
+  var cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  cursor.setAttribute('aria-hidden', 'true');
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CHAR_MS = 14;
+  var hasRun = false;
+  var skipRequested = false;
+  var pinnedLink = null;
+
+  // ---- The response content, typed in this order ----
+  var plan = [
+    { el: document.getElementById('leadLine'),
+      text: "Here's the KB article based on your spec:",
+      show: stages.article, announce: 'Writing the article.' },
+    { el: document.getElementById('s1'), text: "Open the tablet's Wi-Fi settings." },
+    { el: document.getElementById('s2'), text: "From the list of available networks, select CorpWiFi." },
+    { el: document.getElementById('s3'), text: "When prompted, enter the network passphrase." },
+    { el: document.getElementById('s4'), text: "Once the tablet shows a Connected status, open a browser and confirm the page loads to verify internet access." },
+    { el: document.getElementById('assumeHead'), text: "ASSUMPTIONS I MADE",
+      show: stages.assumptions, announce: 'Now listing assumptions made.' },
+    { el: document.getElementById('a1'), text: "I assumed the network appears in the list exactly as CorpWiFi. I have not seen the real device or console." },
+    { el: document.getElementById('a2'), text: "I assumed the tablet joins with a passphrase, not a login portal or a certificate." },
+    { el: document.getElementById('a3'), text: "I assumed the setting is reached through Wi-Fi settings. I do not know the tablet's exact OS or version, so the real menu path may differ." },
+    { el: document.getElementById('a4'), text: "I assumed Connected is the status word the tablet itself displays once joined.",
+      afterDelay: 600,
+      after: function(){
+        linkHint.hidden = false;
+        allLinkButtons().forEach(function(b){ b.disabled = false; });
+        say('Steps and assumptions are now linked below. Hover or click one to see the connection.');
+      } },
+    { el: document.getElementById('checkHead'), text: "WHAT TO CHECK",
+      show: stages.check, announce: 'Now listing what to check.' },
+    { el: document.getElementById('c1'), text: "Confirm the tablet's OS and version, since the real menu path can differ by platform." },
+    { el: document.getElementById('c2'), text: "Confirm the network name matches the real list exactly, including capitalization." },
+    { el: document.getElementById('c3'), text: "Confirm whether CorpWiFi needs a passphrase or a separate login step." },
+    { el: document.getElementById('c4'), text: "Confirm what the tablet actually shows once it is connected." }
+  ];
+
+  function say(msg){
+    if(liveRegion){ liveRegion.textContent = msg; }
+  }
+
+  function allLinkButtons(){
+    return document.querySelectorAll('.linkbtn[data-link]');
+  }
+
+  function setHighlight(linkVal){
+    document.querySelectorAll('li[data-link="' + linkVal + '"]').forEach(function(li){
+      li.classList.add('linked-highlight');
+    });
+  }
+  function clearHighlight(linkVal){
+    document.querySelectorAll('li[data-link="' + linkVal + '"]').forEach(function(li){
+      li.classList.remove('linked-highlight');
+    });
+  }
+  function setPressed(linkVal, val){
+    document.querySelectorAll('.linkbtn[data-link="' + linkVal + '"]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(val));
+    });
+  }
+
+  function clearAll(){
+    plan.forEach(function(step){ step.el.textContent = ''; });
+    Object.keys(stages).forEach(function(k){ stages[k].classList.remove('visible'); });
+    if(cursor.parentNode){ cursor.parentNode.removeChild(cursor); }
+    placeholder.style.display = 'block';
+    respLabel.hidden = true;
+    skipBtn.hidden = true;
+    linkHint.hidden = true;
+    msgActions.hidden = true;
+    copiedNote.hidden = true;
+    upBtn.setAttribute('aria-pressed', 'false');
+    downBtn.setAttribute('aria-pressed', 'false');
+    if(pinnedLink){ clearHighlight(pinnedLink); setPressed(pinnedLink, false); }
+    pinnedLink = null;
+    skipRequested = false;
+    allLinkButtons().forEach(function(b){ b.disabled = true; });
+  }
+
+  function typeStep(i, done){
+    if(i >= plan.length){ done(); return; }
+    var step = plan[i];
+    if(step.show){ step.show.classList.add('visible'); }
+    if(step.announce){ say(step.announce); }
+
+    function finishStep(){
+      if(step.after){ step.after(); }
+      if(step.afterDelay && !reduceMotion && !skipRequested){
+        setTimeout(function(){ typeStep(i + 1, done); }, step.afterDelay);
+      } else {
+        typeStep(i + 1, done);
+      }
+    }
+
+    if(reduceMotion || skipRequested){
+      step.el.textContent = step.text;
+      finishStep();
+      return;
+    }
+
+    var idx = 0;
+    (function tick(){
+      if(skipRequested){
+        step.el.textContent = step.text;
+        finishStep();
+        return;
+      }
+      if(idx < step.text.length){
+        step.el.textContent += step.text.charAt(idx);
+        step.el.appendChild(cursor);
+        idx++;
+        setTimeout(tick, CHAR_MS);
+      } else {
+        finishStep();
+      }
+    })();
+  }
+
+  function reveal(){
+    btn.setAttribute('aria-disabled', 'true');
+    placeholder.style.display = 'none';
+    respLabel.hidden = false;
+    skipBtn.hidden = reduceMotion;
+
+    typeStep(0, function(){
+      if(cursor.parentNode){ cursor.parentNode.removeChild(cursor); }
+      // Move focus off Skip before it disappears, so a keyboard user
+      // doesn't lose their place when it's hidden.
+      if(document.activeElement === skipBtn){ btn.focus(); }
+      skipBtn.hidden = true;
+      msgActions.hidden = false;
+      btn.setAttribute('aria-disabled', 'false');
+      label.textContent = 'Run it again';
+      hasRun = true;
+      say('Response complete.');
+    });
+  }
+
+  btn.addEventListener('click', function(){
+    if(btn.getAttribute('aria-disabled') === 'true'){ return; }
+    if(hasRun){
+      clearAll();
+      setTimeout(reveal, reduceMotion ? 0 : 150);
+    } else {
+      reveal();
+    }
+  });
+
+  skipBtn.addEventListener('click', function(){
+    skipRequested = true;
+  });
+
+  // ---- Click-to-highlight linking: article steps <-> their assumptions ----
+  allLinkButtons().forEach(function(b){
+    var linkVal = b.getAttribute('data-link');
+    b.addEventListener('mouseenter', function(){ if(!pinnedLink) setHighlight(linkVal); });
+    b.addEventListener('mouseleave', function(){ if(!pinnedLink) clearHighlight(linkVal); });
+    b.addEventListener('focus', function(){ if(!pinnedLink) setHighlight(linkVal); });
+    b.addEventListener('blur', function(){ if(!pinnedLink) clearHighlight(linkVal); });
+    b.addEventListener('click', function(){
+      if(pinnedLink === linkVal){
+        clearHighlight(linkVal);
+        setPressed(linkVal, false);
+        pinnedLink = null;
+        say('Highlight cleared.');
+      } else {
+        if(pinnedLink){ clearHighlight(pinnedLink); setPressed(pinnedLink, false); }
+        setHighlight(linkVal);
+        setPressed(linkVal, true);
+        pinnedLink = linkVal;
+        say('Step and its matching assumption highlighted.');
+      }
+    });
+  });
+
+  // ---- Response actions: copy + helpful / not helpful (local only, nothing sent anywhere) ----
+  copyBtn.addEventListener('click', function(){
+    var lines = [];
+    lines.push(plan[0].text, '');
+    lines.push('1. ' + plan[1].text);
+    lines.push('2. ' + plan[2].text);
+    lines.push('3. ' + plan[3].text);
+    lines.push('4. ' + plan[4].text);
+    lines.push('', plan[5].text);
+    for(var i = 6; i <= 9; i++){ lines.push('- ' + plan[i].text); }
+    lines.push('', plan[10].text);
+    for(var j = 11; j <= 14; j++){ lines.push('- ' + plan[j].text); }
+    var text = lines.join('\n');
+    try{
+      navigator.clipboard.writeText(text).then(function(){
+        copiedNote.hidden = false;
+        setTimeout(function(){ copiedNote.hidden = true; }, 2000);
+      });
+    } catch(e){ /* clipboard unavailable; fail silently */ }
+  });
+
+  function toggleReact(pressed, other){
+    var isPressed = pressed.getAttribute('aria-pressed') === 'true';
+    pressed.setAttribute('aria-pressed', String(!isPressed));
+    if(!isPressed){ other.setAttribute('aria-pressed', 'false'); }
+  }
+  upBtn.addEventListener('click', function(){ toggleReact(upBtn, downBtn); });
+  downBtn.addEventListener('click', function(){ toggleReact(downBtn, upBtn); });
+})();
+
+(function(){
+  var finishBtn = document.getElementById('finishBtn');
+  var doneNote = document.getElementById('doneNote');
+
+  finishBtn.addEventListener('click', function(){
+    window.close();
+    // Most browsers only let script close a tab it opened itself, so this
+    // click will silently no-op when the page was reached by a normal link.
+    // If we're still here a moment later, tell the learner to close it by hand.
+    setTimeout(function(){
+      finishBtn.disabled = true;
+      doneNote.hidden = false;
+    }, 250);
+  });
+})();
+
+(function(){
+  // Copy / Copy-as-TXT for the example prompt itself, so a learner can take
+  // it and try it in their own ChatGPT account. Reads straight from the
+  // prompt bubble rather than a duplicated string, so it can't drift.
+  var copyPromptBtn = document.getElementById('copyPromptBtn');
+  var copyPromptTxtBtn = document.getElementById('copyPromptTxtBtn');
+  var promptActionNote = document.getElementById('promptActionNote');
+  var promptPre = document.querySelector('.bubble-user pre');
+  var noteTimer = null;
+
+  function showPromptNote(msg){
+    promptActionNote.textContent = msg;
+    promptActionNote.hidden = false;
+    if(noteTimer){ clearTimeout(noteTimer); }
+    noteTimer = setTimeout(function(){ promptActionNote.hidden = true; }, 2500);
+  }
+
+  copyPromptBtn.addEventListener('click', function(){
+    if(!navigator.clipboard || !navigator.clipboard.writeText){ return; }
+    navigator.clipboard.writeText(promptPre.textContent).then(function(){
+      showPromptNote('Prompt copied to your clipboard.');
+    }).catch(function(){ /* clipboard unavailable; fail silently */ });
+  });
+
+  copyPromptTxtBtn.addEventListener('click', function(){
+    try{
+      var blob = new Blob([promptPre.textContent], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'corpwifi-generation-prompt.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      showPromptNote('Prompt saved as a text file.');
+    } catch(e){ /* download unavailable; fail silently */ }
+  });
+})();
+</script>
+
+</body>
+</html>
