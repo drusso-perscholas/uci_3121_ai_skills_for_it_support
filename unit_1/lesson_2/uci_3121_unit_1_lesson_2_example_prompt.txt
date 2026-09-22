@@ -1,0 +1,20 @@
+You are a senior IT support technician writing a knowledge base
+article for Tier 1 staff. Write the article from the
+SPECIFICATION below.
+
+SPECIFICATION:
+Audience: Tier 1 support tech with no prior context on this ticket.
+Task: Document how to connect a contractor's tablet to CorpWiFi.
+Required steps:
+1. Open Wi-Fi settings on the tablet.
+2. Select CorpWiFi from the list of available networks.
+3. Enter the network passphrase.
+4. Confirm the tablet shows as connected and can reach the internet.
+Success state: The tablet connects and the user can reach the internet.
+
+OUTPUT FORMAT:
+1. The article in clear numbered steps.
+2. Then a section titled ASSUMPTIONS I MADE listing every menu
+   label, path, version, or fact you assumed but did not verify.
+3. Then a section titled WHAT TO CHECK listing anything a reader
+   could get wrong.
