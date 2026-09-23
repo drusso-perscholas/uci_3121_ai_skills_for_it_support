@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Highlight the Claims to Check</title>
+<style>
+  :root{
+    --ink:#25306B; --ink2:#1C2657; --orange:#C9740B; --orangebg:#F2911B;
+    --green:#2E9E57; --greenwash:#F0F7F1; --grey:#6B7280; --notegrey:#4B5563;
+    --card:#F4F6FB; --light:#EEF1F8; --line:#D7DDF0; --warm:#FDF2E2; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:Arial,Helvetica,sans-serif; color:var(--ink2);
+    background:#fff; line-height:1.5; padding:20px 14px 40px;
+  }
+  .wrap{max-width:700px; margin:0 auto;}
+
+  .headrow{display:flex; align-items:flex-start; justify-content:space-between; gap:14px;}
+  .eyebrow{color:var(--orange); font-weight:bold; font-size:13px;
+    letter-spacing:.06em; text-transform:uppercase; margin:0 0 4px;}
+  h1{color:var(--ink); font-size:21px; margin:0; font-weight:bold;}
+  .chip{flex:0 0 auto; font-size:11px; font-weight:bold; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink); background:var(--light);
+    border:1px solid var(--line); padding:5px 11px; border-radius:20px;
+    white-space:nowrap; margin-top:2px;}
+
+  .lede{color:var(--grey); font-size:14px; margin:10px 0 20px;}
+
+  /* Progress bar */
+  .progress-wrap{position:sticky; top:0; background:#fff; padding:10px 0 14px;
+    z-index:2; border-bottom:1px solid var(--line); margin-bottom:18px;}
+  .progress-label{display:flex; justify-content:space-between; align-items:baseline;
+    font-size:13px; font-weight:bold; color:var(--ink); margin-bottom:6px;}
+  .progress-label span.count{color:var(--green);}
+  .progress-track{height:8px; background:var(--card); border-radius:5px; overflow:hidden;}
+  .progress-fill{height:100%; width:0%; background:var(--green);
+    transition:width .35s ease; border-radius:5px;}
+
+  .card{border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:16px;}
+  .card-hd{background:var(--ink); color:var(--white); padding:11px 16px;
+    font-size:13px; font-weight:bold;}
+  .card-hd .tag{display:block; font-size:11px; font-weight:normal; color:#C7CCE8;
+    margin-top:2px;}
+  .card-bd{padding:16px 18px; background:var(--white);}
+
+  .sect-hd{font-size:12px; font-weight:bold; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--orange); margin:18px 0 8px;}
+  .sect-hd:first-child{margin-top:0;}
+
+  /* Clickable sentence buttons */
+  button.sentence{
+    display:block; width:100%; text-align:left; font-family:Arial; font-size:14.5px;
+    line-height:1.5; color:var(--ink2); background:var(--light); border:1px dashed var(--line);
+    border-radius:7px; padding:10px 12px; margin-bottom:8px; cursor:pointer;
+  }
+  button.sentence:hover{border-color:var(--orange);}
+  button.sentence:focus-visible{outline:3px solid var(--orangebg); outline-offset:1px;}
+
+  button.sentence.is-claim{background:var(--greenwash); border:1px solid var(--green);
+    cursor:default;}
+  button.sentence.is-safe{background:var(--card); border:1px solid var(--line); cursor:default;}
+  button.sentence[disabled]{opacity:1;}
+
+  .badge{display:block; margin-top:7px; font-size:12.5px; font-weight:bold;}
+  .badge.claim{color:var(--ink2);}
+  .badge.claim .ico{color:var(--green); font-weight:bold;}
+  .note{display:block; margin-top:7px; font-size:12.5px; font-weight:normal;
+    font-style:italic; color:var(--notegrey);}
+  .note .ico{font-style:normal; font-weight:bold;}
+
+  .instr{font-size:13px; color:var(--grey); margin:0 0 14px;}
+
+  .banner{display:none; border-radius:8px; padding:14px 16px; margin:4px 0 18px;
+    background:var(--greenwash); border:1px solid var(--green); font-size:14px;
+    color:var(--ink2);}
+  .banner strong{color:var(--green);}
+  .banner.show{display:block;}
+
+  .footer-row{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:6px;}
+  button.reset{
+    font-family:Arial; font-size:13px; font-weight:bold; color:var(--ink);
+    background:var(--white); border:1px solid var(--line); border-radius:20px;
+    padding:8px 18px; cursor:pointer;
+  }
+  button.reset:hover{border-color:var(--ink);}
+  button.reset:focus-visible{outline:3px solid var(--orangebg); outline-offset:2px;}
+
+  button.finish{
+    font-family:Arial; font-size:13px; font-weight:bold; color:var(--ink2);
+    background:var(--orangebg); border:1px solid var(--orangebg); border-radius:20px;
+    padding:8px 18px; cursor:pointer;
+  }
+  button.finish:hover{background:#DD8410; border-color:#DD8410;}
+  button.finish:focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
+  button.finish[disabled]{cursor:default; opacity:.85;}
+
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="headrow">
+    <div>
+      <p class="eyebrow">Activity 2.2</p>
+      <h1>Highlight the Claims to Check</h1>
+    </div>
+    <span class="chip">Practice &middot; not scored</span>
+  </div>
+
+  <p class="lede">Click each sentence below that names something you could check against a real system, like a menu label, a network name, or a version. Leave the general framing sentences alone.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Claims found</span>
+      <span><span class="count" id="countNum">0</span> / <span id="countTotal">8</span></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <p class="sr-only" id="liveRegion" aria-live="polite"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      Sample AI draft, not yours
+      <span class="tag">Connect a Contractor's Tablet to CorpWiFi</span>
+    </div>
+    <div class="card-bd">
+
+      <p class="sect-hd">Article</p>
+      <div id="articleGroup"></div>
+
+      <p class="sect-hd">Assumptions I Made</p>
+      <div id="assumptionsGroup"></div>
+
+    </div>
+  </div>
+
+  <div class="banner" id="doneBanner">
+    <strong>All 8 checkable claims found.</strong> The other four lines were safe framing and process notes, nothing there to verify against a real system. This is exactly what you will separate out in Lesson 3, where you check each claim against the simulated console and the official docs.
+  </div>
+
+  <div class="footer-row">
+    <button type="button" class="reset" id="resetBtn">Reset and try again</button>
+    <button type="button" class="finish" id="finishBtn">Finished - Close Window</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var articleSentences = [
+    { type:'safe', text:"This article walks a Tier 1 technician through connecting a contractor's tablet to the CorpWiFi network.",
+      note:"General framing. Nothing named here to check against a real system." },
+    { type:'claim', text:"Open the tablet's Wi-Fi settings." },
+    { type:'claim', text:"From the list of available networks, select CorpWiFi." },
+    { type:'claim', text:"When prompted, enter the network passphrase." },
+    { type:'claim', text:"Once the tablet shows a Connected status, open a browser and confirm the page loads to verify internet access." },
+    { type:'safe', text:"This confirms the device has both joined the network and can reach outside resources.",
+      note:"Restates why the step matters. No specific label, path, or version to verify." },
+    { type:'safe', text:"If the tablet still cannot connect, contact IT support for further help.",
+      note:"General fallback advice, not a fact about this system." }
+  ];
+
+  var assumptionSentences = [
+    { type:'claim', text:"I assumed the network appears in the list exactly as CorpWiFi. I have not seen the real device or console." },
+    { type:'claim', text:"I assumed the tablet joins with a passphrase, not a login portal or a certificate." },
+    { type:'claim', text:"I assumed the setting is reached through Wi-Fi settings. I do not know the tablet's exact OS or version, so the real menu path may differ." },
+    { type:'claim', text:"I assumed Connected is the status word the tablet itself displays once joined." },
+    { type:'safe', text:"These assumptions could be wrong, so confirm each one before this article goes to a real reader.",
+      note:"A reminder about the process, not a claim about the system itself." }
+  ];
+
+  var totalClaims = articleSentences.concat(assumptionSentences).filter(function(s){ return s.type === 'claim'; }).length;
+  var claimsFound = 0;
+
+  document.getElementById('countTotal').textContent = totalClaims;
+
+  function buildGroup(container, items){
+    items.forEach(function(item){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sentence';
+      btn.textContent = item.text;
+      btn.addEventListener('click', function(){ handleClick(btn, item); });
+      container.appendChild(btn);
+    });
+  }
+
+  function announce(msg){
+    document.getElementById('liveRegion').textContent = msg;
+  }
+
+  function handleClick(btn, item){
+    if(btn.disabled) return;
+    btn.disabled = true;
+
+    if(item.type === 'claim'){
+      btn.classList.add('is-claim');
+      var badge = document.createElement('span');
+      badge.className = 'badge claim';
+      badge.innerHTML = '<span class="ico">&#10003;</span> Checkable claim, confirm this against the real system.';
+      btn.appendChild(badge);
+      claimsFound++;
+      updateProgress();
+      announce('Checkable claim found. ' + claimsFound + ' of ' + totalClaims + ' claims found.');
+    } else {
+      btn.classList.add('is-safe');
+      var note = document.createElement('span');
+      note.className = 'note';
+      note.innerHTML = '<span class="ico">i</span> ' + item.note;
+      btn.appendChild(note);
+      announce('Safe prose. ' + item.note);
+    }
+  }
+
+  function updateProgress(){
+    document.getElementById('countNum').textContent = claimsFound;
+    var pct = Math.round((claimsFound / totalClaims) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    if(claimsFound === totalClaims){
+      document.getElementById('doneBanner').classList.add('show');
+    }
+  }
+
+  function reset(){
+    claimsFound = 0;
+    document.getElementById('articleGroup').innerHTML = '';
+    document.getElementById('assumptionsGroup').innerHTML = '';
+    buildGroup(document.getElementById('articleGroup'), articleSentences);
+    buildGroup(document.getElementById('assumptionsGroup'), assumptionSentences);
+    updateProgress();
+    document.getElementById('doneBanner').classList.remove('show');
+    announce('Reset. 0 of ' + totalClaims + ' claims found.');
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', reset);
+
+  document.getElementById('finishBtn').addEventListener('click', function(){
+    var btn = this;
+    window.close();
+    // Some browsers block scripts from closing a tab they did not open
+    // themselves. If the tab is still open a moment later, hand the
+    // learner a plain instruction instead of failing silently.
+    setTimeout(function(){
+      if(!window.closed){
+        btn.textContent = 'You can close this tab now';
+        btn.disabled = true;
+        announce('This activity is finished. You can close this browser tab and return to the lesson.');
+      }
+    }, 300);
+  });
+
+  buildGroup(document.getElementById('articleGroup'), articleSentences);
+  buildGroup(document.getElementById('assumptionsGroup'), assumptionSentences);
+})();
+</script>
+
+</body>
+</html>
