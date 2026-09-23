@@ -1,0 +1,13 @@
+You are a senior IT support technician writing a knowledge base
+article for Tier 1 staff. Write the article from the
+SPECIFICATION below.
+
+SPECIFICATION:
+[Replace with your spec from Lesson 1]
+
+OUTPUT FORMAT:
+1. The article in clear numbered steps.
+2. Then a section titled ASSUMPTIONS I MADE listing every menu
+   label, path, version, or fact you assumed but did not verify.
+3. Then a section titled WHAT TO CHECK listing anything a reader
+   could get wrong.
